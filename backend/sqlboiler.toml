@@ -15,7 +15,7 @@ add-enum-types = true
 
 # This is the postgres config, which should be self explanatory.
 [psql]
-dbname = "postgres"
+dbname = "smartwatch_project"
 host = "localhost"
 port = 5432
 user = "postgres"

@@ -18,8 +18,8 @@ func main() {
 	fmt.Println("DB connected.")
 
 	user := &dbModels.User{
-		Username: "1234",
-		Password: "1234",
+		Username: "al2t",
+		Password: "a2lt",
 	}
 
 	err := user.Insert(context.Background(), db, boil.Infer())
@@ -29,18 +29,35 @@ func main() {
 
 	fmt.Println(user.ID)
 
-	userQ, err := dbModels.Users(dbModels.UserWhere.Username.EQ("1234")).OneG(context.Background())
+	userQ, err := dbModels.Users(dbModels.UserWhere.Username.EQ("al2t")).OneG(context.Background())
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println(userQ)
+	fmt.Println(userQ.Username)
+	createEvent(context.Background(), *userQ)
 }
 
 func connectDB() *sql.DB {
-	db, err := sql.Open("postgres", "postgres://postgres:1234@localhost:5432/postgres?sslmode=disable")
+	db, err := sql.Open("postgres", "postgres://postgres:1234@localhost:5432/smartwatch_project?sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
 	return db
+}
+
+func createEvent(ctx context.Context, user dbModels.User) dbModels.Event {
+
+	fmt.Println(user.ID)
+	event := dbModels.Event{
+		Eventname: "Hello World",
+		Eventid:   user.ID,
+	}
+
+	err := event.InsertG(ctx, boil.Infer())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return event
 }

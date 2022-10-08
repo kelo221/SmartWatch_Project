@@ -28,6 +28,7 @@ type Event struct {
 	Eventname string    `boil:"eventname" json:"eventname" toml:"eventname" yaml:"eventname"`
 	CreatedAt null.Time `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
 	Eventid   int       `boil:"eventid" json:"eventid" toml:"eventid" yaml:"eventid"`
+	Issilent  null.Bool `boil:"issilent" json:"issilent,omitempty" toml:"issilent" yaml:"issilent,omitempty"`
 
 	R *eventR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L eventL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -38,11 +39,13 @@ var EventColumns = struct {
 	Eventname string
 	CreatedAt string
 	Eventid   string
+	Issilent  string
 }{
 	ID:        "id",
 	Eventname: "eventname",
 	CreatedAt: "created_at",
 	Eventid:   "eventid",
+	Issilent:  "issilent",
 }
 
 var EventTableColumns = struct {
@@ -50,11 +53,13 @@ var EventTableColumns = struct {
 	Eventname string
 	CreatedAt string
 	Eventid   string
+	Issilent  string
 }{
 	ID:        "event.id",
 	Eventname: "event.eventname",
 	CreatedAt: "event.created_at",
 	Eventid:   "event.eventid",
+	Issilent:  "event.issilent",
 }
 
 // Generated where
@@ -129,16 +134,42 @@ func (w whereHelpernull_Time) GTE(x null.Time) qm.QueryMod {
 func (w whereHelpernull_Time) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
 func (w whereHelpernull_Time) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
+type whereHelpernull_Bool struct{ field string }
+
+func (w whereHelpernull_Bool) EQ(x null.Bool) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_Bool) NEQ(x null.Bool) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_Bool) LT(x null.Bool) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_Bool) LTE(x null.Bool) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_Bool) GT(x null.Bool) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_Bool) GTE(x null.Bool) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
+func (w whereHelpernull_Bool) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_Bool) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+
 var EventWhere = struct {
 	ID        whereHelperint
 	Eventname whereHelperstring
 	CreatedAt whereHelpernull_Time
 	Eventid   whereHelperint
+	Issilent  whereHelpernull_Bool
 }{
 	ID:        whereHelperint{field: "\"event\".\"id\""},
 	Eventname: whereHelperstring{field: "\"event\".\"eventname\""},
 	CreatedAt: whereHelpernull_Time{field: "\"event\".\"created_at\""},
 	Eventid:   whereHelperint{field: "\"event\".\"eventid\""},
+	Issilent:  whereHelpernull_Bool{field: "\"event\".\"issilent\""},
 }
 
 // EventRels is where relationship names are stored.
@@ -169,9 +200,9 @@ func (r *eventR) GetEventidUser() *User {
 type eventL struct{}
 
 var (
-	eventAllColumns            = []string{"id", "eventname", "created_at", "eventid"}
+	eventAllColumns            = []string{"id", "eventname", "created_at", "eventid", "issilent"}
 	eventColumnsWithoutDefault = []string{"eventname", "eventid"}
-	eventColumnsWithDefault    = []string{"id", "created_at"}
+	eventColumnsWithDefault    = []string{"id", "created_at", "issilent"}
 	eventPrimaryKeyColumns     = []string{"id"}
 	eventGeneratedColumns      = []string{}
 )
