@@ -1,63 +1,28 @@
 package main
 
 import (
-	dbModels "SmartWatch_Project/db/models"
-	"context"
-	"database/sql"
-	"fmt"
-	_ "github.com/lib/pq"
-	"github.com/volatiletech/sqlboiler/v4/boil"
-	"log"
+	routes "SmartWatch_Project/Routes"
+	databaseHandler "SmartWatch_Project/db"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
-//go:generate sqlboiler --wipe psql
 func main() {
-	db := connectDB()
-	boil.SetDB(db)
+	databaseHandler.ConnectToDB()
+	app := fiber.New()
 
-	fmt.Println("DB connected.")
+	app.Static("/", "./public")
 
-	user := &dbModels.User{
-		Username: "al2t",
-		Password: "a2lt",
-	}
+	app.Use(cors.New(cors.Config{
+		AllowCredentials: true,
+		AllowOrigins:     "https://127.0.0.1:8000, http://127.0.0.1:8000,  http://localhost:8000,  http://localhost:3000,",
+		AllowHeaders:     "Origin, Content-Type, Accept",
+	}))
 
-	err := user.Insert(context.Background(), db, boil.Infer())
+	routes.Setup(app)
+
+	err := app.Listen(":8000")
 	if err != nil {
-		fmt.Println("cant insert")
+		return
 	}
-
-	fmt.Println(user.ID)
-
-	userQ, err := dbModels.Users(dbModels.UserWhere.Username.EQ("al2t")).OneG(context.Background())
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println(userQ.Username)
-	createEvent(context.Background(), *userQ)
-}
-
-func connectDB() *sql.DB {
-	db, err := sql.Open("postgres", "postgres://postgres:1234@localhost:5432/smartwatch_project?sslmode=disable")
-	if err != nil {
-		log.Fatal(err)
-	}
-	return db
-}
-
-func createEvent(ctx context.Context, user dbModels.User) dbModels.Event {
-
-	fmt.Println(user.ID)
-	event := dbModels.Event{
-		Eventname: "Hello World",
-		Eventid:   user.ID,
-	}
-
-	err := event.InsertG(ctx, boil.Infer())
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return event
 }
