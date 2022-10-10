@@ -48,20 +48,16 @@ func connectDB() *sql.DB {
 	return db
 }
 
-func CreateEvent(ctx context.Context, user dbModels.User) dbModels.Event {
+func CreateEvent(ctx context.Context, newEvent dbModels.Event) string {
 
-	fmt.Println(user.ID)
-	event := dbModels.Event{
-		Eventname: "Hello World",
-		Eventid:   user.ID,
-	}
-
-	err := event.InsertG(ctx, boil.Infer())
+	fmt.Println(newEvent)
+	err := newEvent.InsertG(ctx, boil.Infer())
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		return err.Error()
 	}
 
-	return event
+	return ""
 }
 
 func CreateUser(user dbModels.User) string {

@@ -8,9 +8,10 @@ CREATE TABLE "user"
 CREATE TABLE "event"
 (
     id         serial primary key,
-    eventName  varchar not null,
+    eventName  varchar   not null,
+    eventTime  timestamp not null,
     created_at timestamp default now(),
-    eventId    int     not null,
+    eventId    int       not null,
     isSilent   bool      default false,
     constraint fk_event_id foreign key (eventId) references "user" (id)
 );

@@ -3,9 +3,15 @@ package controllers
 import (
 	databaseHandler "SmartWatch_Project/db"
 	dbModels "SmartWatch_Project/db/models"
+	"context"
+	"fmt"
+
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
 	"log"
+	"time"
+
+	"github.com/golang-jwt/jwt/v4"
 )
 
 func hashAndSalt(pwd string) string {
@@ -18,16 +24,11 @@ func hashAndSalt(pwd string) string {
 	return string(hash)
 }
 
-func comparePasswords(hashedPwd string, plainPwd []byte) bool {
+func comparePasswords(hashedPwd string, plainPwd []byte) error {
 
 	byteHash := []byte(hashedPwd)
 	err := bcrypt.CompareHashAndPassword(byteHash, plainPwd)
-	if err != nil {
-		log.Println(err)
-		return false
-	}
-
-	return true
+	return err
 }
 func Register(c *fiber.Ctx) error {
 
@@ -65,7 +66,7 @@ func Register(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"message": "Registered!"})
 }
 
-/*func Login(c *fiber.Ctx) error {
+func Login(c *fiber.Ctx) error {
 
 	var data map[string]string
 
@@ -74,55 +75,39 @@ func Register(c *fiber.Ctx) error {
 		return err
 	}
 
-	dbQuery := fmt.Sprintf("FOR r IN Users FILTER r.Email == \"%s\" RETURN r", data["email"])
-	user := database.AqlReturnUser(dbQuery)
-
-	if user.Email == "" {
-		c.Status(fiber.StatusBadRequest)
-		return c.JSON(fiber.Map{
-			"message": "Invalid Credentials.",
-		})
-
-	}
-
-	if err := user.ComparePassword(data["password"]); err != nil {
-		c.Status(fiber.StatusBadRequest)
-		return c.JSON(fiber.Map{
-			"message": "Invalid Credentials.",
-		})
-	}
-
-	var privilege models.UserType
-
-	if strings.Contains(c.Path(), "api/user") {
-		privilege = models.Regular
-	} else {
-		privilege = models.Admin
-	}
-
-	token, err := middlewares.GenerateJWT(user.Id, privilege)
-
+	user, err := dbModels.Users(dbModels.UserWhere.Username.EQ(data["username"])).OneG(context.Background())
 	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(user.Username)
+
+	if err := comparePasswords(user.Password, []byte(data["password"])); err != nil {
 		c.Status(fiber.StatusBadRequest)
 		return c.JSON(fiber.Map{
 			"message": "Invalid Credentials.",
 		})
 	}
 
-	cookie := fiber.Cookie{
-		Name:     "jwt",
-		Value:    token,
-		Expires:  time.Now().Add(time.Hour * 24),
-		HTTPOnly: true,
-		SameSite: "None",
+	// Create the Claims
+	claims := jwt.MapClaims{
+		"username": user.Username,
+		"ID":       user.ID,
+		"exp":      time.Now().Add(time.Hour * 72).Unix(),
 	}
-	c.Cookie(&cookie)
 
-	return c.JSON(fiber.Map{
-		"message": "Success.",
-	})
+	// Create token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-}*/
+	// Generate encoded token and send it as response.
+	t, err := token.SignedString([]byte("secret"))
+	if err != nil {
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+
+	return c.JSON(fiber.Map{"token": t})
+
+}
 
 /*func User(c *fiber.Ctx) error {
 
