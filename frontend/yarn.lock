@@ -4632,6 +4632,11 @@ grapheme-splitter@^1.0.4:
   resolved "https://registry.yarnpkg.com/grapheme-splitter/-/grapheme-splitter-1.0.4.tgz#9cf3a665c6247479896834af35cf1dbb4400767e"
   integrity sha512-bzh50DW9kTPM00T8y4o8vQg89Di9oLJVLW/KaOGIXJWP/iqCN6WKYkbNOF04vFLJhwcpYUh9ydh/+5vpOqV4YQ==
 
+grommet-theme-hpe@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/grommet-theme-hpe/-/grommet-theme-hpe-4.0.0.tgz#b41f9b0e6533ecd116c3ca0d863916760a2cd5b1"
+  integrity sha512-V4DFr3KGC3AiKXLfXYSwDKwXJ9ub5Ji4LXtftHZQKbzpB/3yP6cJTCQxzUV+E4bjxnZ+Z+xjHa9SkO7cwUp/vQ==
+
 gzip-size@^6.0.0:
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/gzip-size/-/gzip-size-6.0.0.tgz#065367fd50c239c0671cbcbad5be3e2eeb10e462"

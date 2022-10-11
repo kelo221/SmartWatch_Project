@@ -1,21 +1,18 @@
 import React from 'react'
-import {
-    Grommet,
-    Heading,
-    Box,
-    Text,
-    Page,
-    PageContent,
-    Paragraph,
-} from 'grommet'
+import { Box, Grommet, Page, PageContent } from 'grommet'
+
+import { hpe } from 'grommet-theme-hpe'
+import MainHeader from './Components/Header'
+import RegisterForm from './Components/RegisterForm'
+
 function App() {
     return (
-        <Grommet className="App">
+        <Grommet className="App" theme={hpe}>
             <Page>
-                <Heading>Hello World</Heading>
+                <MainHeader></MainHeader>
                 <PageContent>
                     <Box>
-                        <Text>Hello Grommet</Text>
+                        <RegisterForm />
                     </Box>
                 </PageContent>
             </Page>
