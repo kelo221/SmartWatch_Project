@@ -6,19 +6,16 @@ import {
     FormField,
     Header,
     Heading,
-    List,
     MaskedInput,
     ResponsiveContext,
-    Text,
     TextInput,
 } from 'grommet'
 import { Link } from 'react-router-dom'
 
-const RegisterForm = () => {
+const LoginForm = () => {
     const [formValues, setFormValues] = React.useState({
         username: '',
         password: '',
-        passwordConfirm: '',
     })
 
     const size = useContext(ResponsiveContext)
@@ -27,7 +24,6 @@ const RegisterForm = () => {
         values: React.SetStateAction<{
             username: string
             password: string
-            passwordConfirm: string
         }>
     ) => {
         setFormValues(values)
@@ -54,9 +50,8 @@ const RegisterForm = () => {
                 pad={{ horizontal: 'xxsmall' }}
             >
                 <Heading level={2} margin="none">
-                    Register
+                    Log in
                 </Heading>
-                <Text>An account is needed to set up alarms</Text>
             </Header>
             <Box pad={{ horizontal: 'xxsmall' }}>
                 <Form
@@ -96,34 +91,18 @@ const RegisterForm = () => {
                         />
                     </FormField>
 
-                    <FormField
-                        required={{ indicator: false }}
-                        label="Password Confirm"
-                        htmlFor="passwordConfirm"
-                        name="passwordConfirm"
-                        info={
-                            <List border={{ color: 'none' }} pad="none"></List>
-                        }
-                    >
-                        <TextInput
-                            id="passwordConfirmField"
-                            name="passwordConfirm"
-                            placeholder="Enter your password"
-                            type="passwordConfirm"
-                        />
-                    </FormField>
                     <Box
                         direction="row"
                         margin={{ top: 'medium', bottom: 'small' }}
                     >
-                        <Link to="/login">
-                            <Button label="Log in" margin="small" secondary />
+                        <Link to="/register">
+                            <Button label="Register" margin="small" secondary />
                         </Link>
 
                         <Button
-                            label="Register"
-                            primary
                             margin="small"
+                            label="Log in"
+                            primary
                             type="submit"
                         />
                     </Box>
@@ -133,4 +112,4 @@ const RegisterForm = () => {
     )
 }
 
-export default RegisterForm
+export default LoginForm
