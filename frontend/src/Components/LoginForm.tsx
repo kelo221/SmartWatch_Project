@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import {
     Box,
     Button,
@@ -7,41 +7,48 @@ import {
     Header,
     Heading,
     MaskedInput,
-    ResponsiveContext,
     TextInput,
 } from 'grommet'
-import { Link } from 'react-router-dom'
-
+import { Link } from '"react-router-dom";import { postData } from '"./FetchRequest";
+interface loginInterface {
+    username: string;
+    password: string;
+}
 const LoginForm = () => {
     const [formValues, setFormValues] = React.useState({
         username: '',
         password: '',
     })
 
-    const size = useContext(ResponsiveContext)
-
     const onChange = (
-        values: React.SetStateAction<{
-            username: string
-            password: string
-        }>
+      values: React.SetStateAction<{
+          username: string
+          password: string
+      }>
     ) => {
-        setFormValues(values)
-        console.log(values)
-    }
+        setFormValues(values);
+    };
 
-    const onSubmit = (value: any, touched: any) => {
-        console.log(value, touched)
-    }
+    const onSubmit = (value: loginInterface) => {
+        postData("http://localhost:8000/api/login", value).then((data) => {
+            if (data !== 400) {
+                console.log("ok!!!");
+                localStorage.setItem("token", data["token"]);
+                window.location.replace(window.location.origin);
+            } else {
+                console.log("failed!!!");
+            }
+        });
+    };
 
     return (
-        <Box
-            margin="small"
-            gap="medium"
-            width="medium"
-            align="center"
-            justify="center"
-            fill
+      <Box
+        margin="small"
+        gap="medium"
+        width="medium"
+        align="center"
+        justify="center"
+        fill
         >
             <Header
                 direction="column"
@@ -55,14 +62,14 @@ const LoginForm = () => {
             </Header>
             <Box pad={{ horizontal: 'xxsmall' }}>
                 <Form
-                    validate="blur"
-                    value={formValues}
-                    messages={{
+                  validate="blur"
+                  value={formValues}
+                  messages={{
                         required: 'This is a required field.',
                     }}
-                    onChange={(nextValue) => onChange(nextValue)}
-                    onSubmit={({ value, touched }) => onSubmit(value, touched)}
-                    method="post"
+                  onChange={(nextValue) => onChange(nextValue)}
+                  onSubmit={({ value }) => onSubmit(value)}
+                  method="post"
                 >
                     <FormField
                         label="Username"
@@ -91,19 +98,16 @@ const LoginForm = () => {
                         />
                     </FormField>
 
-                    <Box
-                        direction="row"
-                        margin={{ top: 'medium', bottom: 'small' }}
-                    >
+                    <Box direction="row">
                         <Link to="/register">
                             <Button label="Register" margin="small" secondary />
                         </Link>
 
                         <Button
-                            margin="small"
-                            label="Log in"
-                            primary
-                            type="submit"
+                          margin="small"
+                          label="Log in"
+                          primary
+                          type="submit"
                         />
                     </Box>
                 </Form>

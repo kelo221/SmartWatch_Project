@@ -77,7 +77,7 @@ func Login(c *fiber.Ctx) error {
 
 	user, err := dbModels.Users(dbModels.UserWhere.Username.EQ(data["username"])).OneG(context.Background())
 	if err != nil {
-		log.Fatal(err)
+		return fiber.ErrBadRequest
 	}
 
 	fmt.Println(user.Username)
