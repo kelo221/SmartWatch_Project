@@ -1,23 +1,17 @@
-import React from 'react'
-import {
-    Box,
-    Button,
-    Form,
-    FormField,
-    Header,
-    Heading,
-    MaskedInput,
-    TextInput,
-} from 'grommet'
-import { Link } from '"react-router-dom";import { postData } from '"./FetchRequest";
+import React from "react";
+import { Box, Button, Form, FormField, Header, Heading, MaskedInput, TextInput } from "grommet";
+import { Link } from "react-router-dom";
+import { postData } from "./FetchRequest";
+
 interface loginInterface {
     username: string;
     password: string;
 }
+
 const LoginForm = () => {
     const [formValues, setFormValues] = React.useState({
-        username: '',
-        password: '',
+        username: "",
+        password: ""
     })
 
     const onChange = (
@@ -27,7 +21,7 @@ const LoginForm = () => {
       }>
     ) => {
         setFormValues(values);
-    };
+    }
 
     const onSubmit = (value: loginInterface) => {
         postData("http://localhost:8000/api/login", value).then((data) => {
@@ -39,7 +33,7 @@ const LoginForm = () => {
                 console.log("failed!!!");
             }
         });
-    };
+    }
 
     return (
       <Box
@@ -49,37 +43,37 @@ const LoginForm = () => {
         align="center"
         justify="center"
         fill
-        >
-            <Header
-                direction="column"
-                align="center"
-                gap="xxsmall"
-                pad={{ horizontal: 'xxsmall' }}
-            >
-                <Heading level={2} margin="none">
-                    Log in
-                </Heading>
+      >
+          <Header
+            direction="column"
+            align="center"
+            gap="xxsmall"
+            pad={{ horizontal: "xxsmall" }}
+          >
+              <Heading level={2} margin="none">
+                  Log in
+              </Heading>
             </Header>
             <Box pad={{ horizontal: 'xxsmall' }}>
                 <Form
                   validate="blur"
                   value={formValues}
                   messages={{
-                        required: 'This is a required field.',
-                    }}
+                      required: "This is a required field."
+                  }}
                   onChange={(nextValue) => onChange(nextValue)}
                   onSubmit={({ value }) => onSubmit(value)}
                   method="post"
                 >
                     <FormField
-                        label="Username"
-                        name="username"
-                        required={{ indicator: false }}
+                      label="Username"
+                      name="username"
+                      required={{ indicator: false }}
                     >
                         <MaskedInput
-                            id="username"
-                            name="username"
-                            type="username"
+                          id="username"
+                          name="username"
+                          type="username"
                             placeholder="Enter your username"
                         />
                     </FormField>
