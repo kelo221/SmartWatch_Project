@@ -1,27 +1,27 @@
-import React, { useContext } from 'react'
+import React, { useContext } from "react";
 import {
-    Box,
-    Button,
-    Form,
-    FormField,
-    Header,
-    Heading,
-    List,
-    MaskedInput,
-    ResponsiveContext,
-    Text,
-    TextInput,
-} from 'grommet'
-import { Link } from 'react-router-dom'
+  Box,
+  Button,
+  Form,
+  FormField,
+  Header,
+  Heading,
+  List,
+  MaskedInput,
+  ResponsiveContext,
+  Text,
+  TextInput
+} from "grommet";
+import { Link } from "react-router-dom";
 
 const RegisterForm = () => {
-    const [formValues, setFormValues] = React.useState({
-        username: '',
-        password: '',
-        passwordConfirm: '',
-    })
+  const [formValues, setFormValues] = React.useState({
+    username: "",
+    password: "",
+    passwordConfirm: ""
+  });
 
-    const size = useContext(ResponsiveContext)
+  const size = useContext(ResponsiveContext);
 
     const onChange = (
         values: React.SetStateAction<{
@@ -102,30 +102,27 @@ const RegisterForm = () => {
                         htmlFor="passwordConfirm"
                         name="passwordConfirm"
                         info={
-                            <List border={{ color: 'none' }} pad="none"></List>
+                          <List border={{ color: "none" }} pad="none"></List>
                         }
                     >
-                        <TextInput
-                            id="passwordConfirmField"
-                            name="passwordConfirm"
-                            placeholder="Enter your password"
-                            type="passwordConfirm"
-                        />
+                      <TextInput
+                        id="passwordConfirmField"
+                        name="passwordConfirm"
+                        placeholder="Enter your password"
+                        type="passwordConfirm"
+                      />
                     </FormField>
-                    <Box
-                        direction="row"
-                        margin={{ top: 'medium', bottom: 'small' }}
-                    >
-                        <Link to="/login">
-                            <Button label="Log in" margin="small" secondary />
-                        </Link>
+                  <Box direction="row">
+                    <Link to="/login">
+                      <Button label="Log in" margin="small" secondary />
+                    </Link>
 
-                        <Button
-                            label="Register"
-                            primary
-                            margin="small"
-                            type="submit"
-                        />
+                    <Button
+                      label="Register"
+                      primary
+                      margin="small"
+                      type="submit"
+                    />
                     </Box>
                 </Form>
             </Box>
