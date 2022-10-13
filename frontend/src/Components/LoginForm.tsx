@@ -25,12 +25,11 @@ const LoginForm = () => {
 
     const onSubmit = (value: loginInterface) => {
         postData("http://localhost:8000/api/login", value).then((data) => {
-            if (data !== 400) {
-                console.log("ok!!!");
+            if (!data.status) {
                 localStorage.setItem("token", data["token"]);
                 window.location.replace(window.location.origin);
             } else {
-                console.log("failed!!!");
+                console.log("failed!!!", data.status);
             }
         });
     }

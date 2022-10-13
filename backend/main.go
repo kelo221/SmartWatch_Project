@@ -13,11 +13,15 @@ func main() {
 
 	app.Static("/", "./public")
 
-	app.Use(cors.New(cors.Config{
+	corsSettings := cors.New(cors.Config{
+		AllowOrigins:     "*",
+		AllowMethods:     "GET,POST,HEAD,OPTIONS,PUT,DELETE,PATCH",
+		AllowHeaders:     "Origin, Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization,X-Requested-With",
+		ExposeHeaders:    "Origin",
 		AllowCredentials: true,
-		AllowOrigins:     "https://127.0.0.1:8000, http://127.0.0.1:8000,  http://localhost:8000,  http://localhost:3000,",
-		AllowHeaders:     "Origin, Content-Type, Accept",
-	}))
+	})
+
+	app.Use(corsSettings)
 
 	routes.Setup(app)
 

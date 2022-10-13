@@ -53,12 +53,12 @@ func CreateUser(user dbModels.User) string {
 
 func FetchMultipleByID(ID int, ctx context.Context) (string, dbModels.EventSlice) {
 
-	author, err := dbModels.Users(dbModels.UserWhere.ID.EQ(ID)).OneG(ctx)
+	user, err := dbModels.Users(dbModels.UserWhere.ID.EQ(ID)).OneG(ctx)
 	if err != nil {
 		return err.Error(), nil
 	}
 
-	events, err := author.EventidEvents().AllG(ctx)
+	events, err := user.EventidEvents().AllG(ctx)
 	if err != nil {
 		return err.Error(), nil
 	}
