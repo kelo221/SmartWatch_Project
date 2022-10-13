@@ -3,6 +3,7 @@ package controllers
 import (
 	databaseHandler "SmartWatch_Project/db"
 	dbModels "SmartWatch_Project/db/models"
+	"encoding/json"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/volatiletech/null/v8"
@@ -17,6 +18,27 @@ func User(c *fiber.Ctx) error {
 	name := claims["username"].(string)
 
 	return c.SendString("Welcome " + name)
+
+}
+
+func GetEvents(c *fiber.Ctx) error {
+
+	user := c.Locals("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	idString := claims["ID"].(float64)
+
+	err, eventsQ := databaseHandler.FetchMultipleByID(int(idString), c.Context())
+	if err != "" {
+		return c.JSON(fiber.Map{"error": err})
+	}
+
+	b, marshalErr := json.Marshal(eventsQ)
+
+	if marshalErr != nil {
+		return c.JSON(fiber.Map{"error": marshalErr})
+	}
+
+	return c.JSON(string(b))
 
 }
 

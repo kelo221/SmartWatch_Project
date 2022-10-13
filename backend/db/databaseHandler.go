@@ -18,26 +18,6 @@ func ConnectToDB() {
 	boil.SetDB(db)
 
 	fmt.Println("DB connected.")
-	/*
-		user := &dbModels.User{
-			Username: "al2t",
-			Password: "a2lt",
-		}
-
-		err := user.Insert(context.Background(), db, boil.Infer())
-		if err != nil {
-			fmt.Println("cant insert")
-		}
-
-		fmt.Println(user.ID)
-
-		userQ, err := dbModels.Users(dbModels.UserWhere.Username.EQ("al2t")).OneG(context.Background())
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		fmt.Println(userQ.Username)
-		createEvent(context.Background(), *userQ)*/
 }
 
 func connectDB() *sql.DB {
@@ -69,4 +49,19 @@ func CreateUser(user dbModels.User) string {
 	}
 
 	return ""
+}
+
+func FetchMultipleByID(ID int, ctx context.Context) (string, dbModels.EventSlice) {
+
+	author, err := dbModels.Users(dbModels.UserWhere.ID.EQ(ID)).OneG(ctx)
+	if err != nil {
+		return err.Error(), nil
+	}
+
+	events, err := author.EventidEvents().AllG(ctx)
+	if err != nil {
+		return err.Error(), nil
+	}
+
+	return "", events
 }
