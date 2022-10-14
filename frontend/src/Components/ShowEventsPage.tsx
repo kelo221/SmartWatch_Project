@@ -5,7 +5,7 @@ import { Card, DataTable, Text } from "grommet";
 import { Checkmark, Close, Trash, Unlink } from "grommet-icons";
 
 
-function MainPage() {
+function ShowEventsPage() {
 
   function deleteButtonHandler(id: number): void {
     console.log("hello", id);
@@ -110,5 +110,5 @@ function MainPage() {
   );
 }
 
-export default MainPage;
+export default ShowEventsPage;
 
