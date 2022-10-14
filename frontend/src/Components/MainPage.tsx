@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { getData } from "./FetchRequest";
 import { TimedEvent } from "../DataFormats/EventType";
-import { Box, Table, TableBody, TableCell, TableHeader, TableRow } from "grommet";
+import { Card, DataTable, Text } from "grommet";
+import { Checkmark, Close, Trash, Unlink } from "grommet-icons";
 
 
 function MainPage() {
+
+  function deleteButtonHandler(id: number): void {
+    console.log("hello", id);
+  }
+
 
   const [events, setEvents] = useState<TimedEvent[]>({} as TimedEvent[]);
 
@@ -20,21 +26,25 @@ function MainPage() {
     });
   }, []);
 
-
-  const eventsLoop = Object.entries(events).map(([index, value]) =>
-    <TableRow key={index}>
-      <TableCell scope="row">
-        {value.eventname}
-      </TableCell>
-      <TableCell>{new Date(Date.parse(value.eventtime.toLocaleString())).toLocaleString()}</TableCell>
-      <TableCell>{value.issilent ? "true" : "false"}</TableCell>
-      <TableCell>{(Date.parse(value.eventtime.toLocaleString())) < (new Date().valueOf()) ? "true" : "false"}</TableCell>
-    </TableRow>
-  );
+  if (!events.length) {
+    return (
+      <Card
+        margin="small"
+        gap="medium"
+        width="medium"
+        align="center"
+        justify="center"
+        alignContent="row"
+        fill
+      >
+        <Unlink></Unlink>
+        <Text>Check your connection</Text>
+      </Card>
+    );
+  }
 
   return (
-
-    <Box
+    <Card
       margin="small"
       gap="medium"
       width="medium"
@@ -42,30 +52,63 @@ function MainPage() {
       justify="center"
       fill
     >
-
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableCell scope="col" border="bottom">
-              Event Name
-            </TableCell>
-            <TableCell scope="col" border="bottom">
-              Event Date
-            </TableCell>
-            <TableCell scope="col" border="bottom">
-              Silent?
-            </TableCell>
-            <TableCell scope="col" border="bottom">
-              Passed?
-            </TableCell>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {eventsLoop}
-        </TableBody>
-      </Table>
-    </Box>
+      <DataTable
+        columns={[
+          {
+            property: "eventname",
+            header: <Text>Name</Text>,
+            primary: true
+          },
+          {
+            property: "eventtime",
+            header: <Text>Event Date</Text>,
+            render: datum => {
+              return <Text>{new Date(Date.parse(datum.eventtime.toLocaleString())).toLocaleString()}</Text>;
+            }
+          },
+          {
+            property: "passed",
+            header: <Text>Passed?</Text>,
+            render: datum => {
+              if ((Date.parse(datum.eventtime.toLocaleString())) < (new Date().valueOf())) {
+                return <Checkmark></Checkmark>;
+              } else {
+                return <Close></Close>;
+              }
+            }
+          },
+          {
+            property: "issilent",
+            header: <Text>Silent?</Text>,
+            render: datum => {
+              if (datum.issilent) {
+                return <Checkmark></Checkmark>;
+              } else {
+                return <Close></Close>;
+              }
+            }
+          },
+          {
+            property: "deleteButton",
+            header: <Text>Delete?</Text>,
+            render: datum => {
+              return (
+                <span onClick={() => deleteButtonHandler(datum.id)}
+                      id={datum.id.toString()}
+                >
+                <Trash style={{ cursor: "pointer" }}></Trash>
+                </span>);
+            }
+          }
+        ]}
+        data={events}
+        fill
+        pin
+        sortable
+      />
+    </Card>
   );
 }
 
 export default MainPage;
+
