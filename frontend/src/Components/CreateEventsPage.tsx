@@ -112,7 +112,7 @@ const CreateEventsPage = () => {
           />
           <CheckBox
             checked={snoozeDisable}
-            label="Disable Snooze (unimplemented)"
+            label="Disable Snooze"
             onChange={(event) => setSnoozeAble(event.target.checked)}
           />
         </FormField>

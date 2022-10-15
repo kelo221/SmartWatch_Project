@@ -14,7 +14,7 @@ export async function postData(url = '', data = {}) {
     })
 
   if (response.status !== 200) {
-    return { status: response.status };
+    return { status: response.status, errorText: response.statusText };
   }
 
   return response.json(); // parses JSON response into native JavaScript objects
