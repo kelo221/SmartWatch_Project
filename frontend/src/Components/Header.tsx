@@ -18,7 +18,7 @@ const MainHeader = (props: Props) => {
         <Button primary label="Show Events" onClick={() => props.setState(true)} />
       </Nav>
       <Nav direction="row">
-        <Button primary label="Create Event" onClick={() => props.setState(false)} />
+        <Button primary label="Create A New Event" onClick={() => props.setState(false)} />
       </Nav>
       <Nav direction="row">
         <Clock type={"digital"} />

@@ -18,7 +18,6 @@ function ShowEventsPage() {
     getData("http://localhost:8000/api/user/events").then((data) => {
       if (!data.status) {
         let jsonObject = JSON.parse(data) as TimedEvent[];
-        console.log(jsonObject);
         setEvents(jsonObject);
       } else {
         console.log("failed!!!", data.status);

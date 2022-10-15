@@ -10,8 +10,6 @@ type Props = {
 
 function Redirector(props: Props) {
 
-  console.log(props.state);
-
   function mainPageRender() {
     if (props.state) {
       return (<ShowEventsPage />);

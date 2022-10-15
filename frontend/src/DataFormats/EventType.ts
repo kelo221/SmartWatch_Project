@@ -6,3 +6,9 @@ export interface TimedEvent {
   eventid: number;
   issilent: boolean | null;
 }
+
+export interface NewEventUpload {
+  eventName: string;
+  eventTime: string;
+  isSilent: string;
+}
