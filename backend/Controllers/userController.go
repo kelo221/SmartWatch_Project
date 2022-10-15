@@ -68,10 +68,24 @@ func NewEvent(c *fiber.Ctx) error {
 		})
 	}
 
-	alarmType, err := strconv.ParseBool(data["isSilent"])
+	if data["SnoozeDisabled"] == "" {
+		c.Status(400)
+		return c.JSON(fiber.Map{
+			"message": "Missing snooze info!",
+		})
+	}
+
+	snoozeType, err := strconv.ParseBool(data["SnoozeDisabled"])
 	if err != nil {
 		return c.JSON(fiber.Map{
 			"message": "Malformed alarm type for a new event!",
+		})
+	}
+
+	alarmType, err := strconv.ParseBool(data["isSilent"])
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"message": "Malformed snooze setting for a new event!",
 		})
 	}
 
@@ -84,10 +98,11 @@ func NewEvent(c *fiber.Ctx) error {
 	eventUnixTime := time.Unix(i, 0)
 
 	newEvent := dbModels.Event{
-		Eventid:   int(userID),
-		Eventname: data["eventName"],
-		Eventtime: eventUnixTime,
-		Issilent:  null.Bool{Bool: alarmType},
+		Eventid:        int(userID),
+		Eventname:      data["eventName"],
+		Eventtime:      eventUnixTime,
+		Issilent:       null.Bool{Bool: alarmType},
+		Snoozedisabled: null.Bool{Bool: snoozeType},
 	}
 
 	eventError := databaseHandler.CreateEvent(c.Context(), newEvent)

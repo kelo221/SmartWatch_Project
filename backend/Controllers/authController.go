@@ -44,7 +44,7 @@ func Register(c *fiber.Ctx) error {
 			"message": "Missing username or password!",
 		})
 	}
-
+	
 	if data["password"] != data["password_confirm"] {
 		c.Status(400)
 		return c.JSON(fiber.Map{

@@ -24,47 +24,52 @@ import (
 
 // Event is an object representing the database table.
 type Event struct {
-	ID        int       `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Eventname string    `boil:"eventname" json:"eventname" toml:"eventname" yaml:"eventname"`
-	Eventtime time.Time `boil:"eventtime" json:"eventtime" toml:"eventtime" yaml:"eventtime"`
-	CreatedAt null.Time `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
-	Eventid   int       `boil:"eventid" json:"eventid" toml:"eventid" yaml:"eventid"`
-	Issilent  null.Bool `boil:"issilent" json:"issilent,omitempty" toml:"issilent" yaml:"issilent,omitempty"`
+	ID             int       `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Eventname      string    `boil:"eventname" json:"eventname" toml:"eventname" yaml:"eventname"`
+	Eventtime      time.Time `boil:"eventtime" json:"eventtime" toml:"eventtime" yaml:"eventtime"`
+	CreatedAt      null.Time `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
+	Eventid        int       `boil:"eventid" json:"eventid" toml:"eventid" yaml:"eventid"`
+	Issilent       null.Bool `boil:"issilent" json:"issilent,omitempty" toml:"issilent" yaml:"issilent,omitempty"`
+	Snoozedisabled null.Bool `boil:"snoozedisabled" json:"snoozedisabled,omitempty" toml:"snoozedisabled" yaml:"snoozedisabled,omitempty"`
 
 	R *eventR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L eventL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var EventColumns = struct {
-	ID        string
-	Eventname string
-	Eventtime string
-	CreatedAt string
-	Eventid   string
-	Issilent  string
+	ID             string
+	Eventname      string
+	Eventtime      string
+	CreatedAt      string
+	Eventid        string
+	Issilent       string
+	Snoozedisabled string
 }{
-	ID:        "id",
-	Eventname: "eventname",
-	Eventtime: "eventtime",
-	CreatedAt: "created_at",
-	Eventid:   "eventid",
-	Issilent:  "issilent",
+	ID:             "id",
+	Eventname:      "eventname",
+	Eventtime:      "eventtime",
+	CreatedAt:      "created_at",
+	Eventid:        "eventid",
+	Issilent:       "issilent",
+	Snoozedisabled: "snoozedisabled",
 }
 
 var EventTableColumns = struct {
-	ID        string
-	Eventname string
-	Eventtime string
-	CreatedAt string
-	Eventid   string
-	Issilent  string
+	ID             string
+	Eventname      string
+	Eventtime      string
+	CreatedAt      string
+	Eventid        string
+	Issilent       string
+	Snoozedisabled string
 }{
-	ID:        "event.id",
-	Eventname: "event.eventname",
-	Eventtime: "event.eventtime",
-	CreatedAt: "event.created_at",
-	Eventid:   "event.eventid",
-	Issilent:  "event.issilent",
+	ID:             "event.id",
+	Eventname:      "event.eventname",
+	Eventtime:      "event.eventtime",
+	CreatedAt:      "event.created_at",
+	Eventid:        "event.eventid",
+	Issilent:       "event.issilent",
+	Snoozedisabled: "event.snoozedisabled",
 }
 
 // Generated where
@@ -185,19 +190,21 @@ func (w whereHelpernull_Bool) IsNull() qm.QueryMod    { return qmhelper.WhereIsN
 func (w whereHelpernull_Bool) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
 var EventWhere = struct {
-	ID        whereHelperint
-	Eventname whereHelperstring
-	Eventtime whereHelpertime_Time
-	CreatedAt whereHelpernull_Time
-	Eventid   whereHelperint
-	Issilent  whereHelpernull_Bool
+	ID             whereHelperint
+	Eventname      whereHelperstring
+	Eventtime      whereHelpertime_Time
+	CreatedAt      whereHelpernull_Time
+	Eventid        whereHelperint
+	Issilent       whereHelpernull_Bool
+	Snoozedisabled whereHelpernull_Bool
 }{
-	ID:        whereHelperint{field: "\"event\".\"id\""},
-	Eventname: whereHelperstring{field: "\"event\".\"eventname\""},
-	Eventtime: whereHelpertime_Time{field: "\"event\".\"eventtime\""},
-	CreatedAt: whereHelpernull_Time{field: "\"event\".\"created_at\""},
-	Eventid:   whereHelperint{field: "\"event\".\"eventid\""},
-	Issilent:  whereHelpernull_Bool{field: "\"event\".\"issilent\""},
+	ID:             whereHelperint{field: "\"event\".\"id\""},
+	Eventname:      whereHelperstring{field: "\"event\".\"eventname\""},
+	Eventtime:      whereHelpertime_Time{field: "\"event\".\"eventtime\""},
+	CreatedAt:      whereHelpernull_Time{field: "\"event\".\"created_at\""},
+	Eventid:        whereHelperint{field: "\"event\".\"eventid\""},
+	Issilent:       whereHelpernull_Bool{field: "\"event\".\"issilent\""},
+	Snoozedisabled: whereHelpernull_Bool{field: "\"event\".\"snoozedisabled\""},
 }
 
 // EventRels is where relationship names are stored.
@@ -228,9 +235,9 @@ func (r *eventR) GetEventidUser() *User {
 type eventL struct{}
 
 var (
-	eventAllColumns            = []string{"id", "eventname", "eventtime", "created_at", "eventid", "issilent"}
+	eventAllColumns            = []string{"id", "eventname", "eventtime", "created_at", "eventid", "issilent", "snoozedisabled"}
 	eventColumnsWithoutDefault = []string{"eventname", "eventtime", "eventid"}
-	eventColumnsWithDefault    = []string{"id", "created_at", "issilent"}
+	eventColumnsWithDefault    = []string{"id", "created_at", "issilent", "snoozedisabled"}
 	eventPrimaryKeyColumns     = []string{"id"}
 	eventGeneratedColumns      = []string{}
 )

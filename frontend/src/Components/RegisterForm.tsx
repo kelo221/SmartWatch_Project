@@ -1,18 +1,8 @@
-import React, { useContext } from "react";
-import {
-  Box,
-  Button,
-  Form,
-  FormField,
-  Header,
-  Heading,
-  List,
-  MaskedInput,
-  ResponsiveContext,
-  Text,
-  TextInput
-} from "grommet";
+import React from "react";
+import { Box, Button, Form, FormField, Header, Heading, List, MaskedInput, Text, TextInput } from "grommet";
 import { Link } from "react-router-dom";
+import { postData } from "./FetchRequest";
+import { RegisterFormJSON } from "../DataFormats/DataFormats";
 
 const RegisterForm = () => {
   const [formValues, setFormValues] = React.useState({
@@ -21,10 +11,8 @@ const RegisterForm = () => {
     passwordConfirm: ""
   });
 
-  const size = useContext(ResponsiveContext);
-
-    const onChange = (
-        values: React.SetStateAction<{
+  const onChange = (
+    values: React.SetStateAction<{
             username: string
             password: string
             passwordConfirm: string
@@ -35,7 +23,21 @@ const RegisterForm = () => {
     }
 
     const onSubmit = (value: any, touched: any) => {
-        console.log(value, touched)
+
+      const registerFormPost: RegisterFormJSON = {
+        username: value.username,
+        password: value.password,
+        password_confirm: value.passwordConfirm
+      };
+
+      postData("http://localhost:8000/api/register", registerFormPost).then((data) => {
+        if (!data.status) {
+          console.log("ok!");
+          window.location.replace(window.location.origin + "/login");
+        } else {
+          console.log("failed!!!", data.status);
+        }
+      });
     }
 
     return (
@@ -109,7 +111,7 @@ const RegisterForm = () => {
                         id="passwordConfirmField"
                         name="passwordConfirm"
                         placeholder="Enter your password"
-                        type="passwordConfirm"
+                        type="password"
                       />
                     </FormField>
                   <Box direction="row">
