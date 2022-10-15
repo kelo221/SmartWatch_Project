@@ -1,6 +1,6 @@
 import { Box, Button, Card, CheckBox, DateInput, Form, FormField, MaskedInput } from "grommet";
 import React from "react";
-import { NewEventUpload } from "../DataFormats/EventType";
+import { NewEventUpload } from "../DataFormats/DataFormats";
 import { postDataWithBearer } from "./FetchRequest";
 
 const hourRegex = /^\b2[0-3]\b|\b[0-1]?[0-9]\b$/;
@@ -33,7 +33,8 @@ const CreateEventsPage = () => {
     const newEvent: NewEventUpload = {
       eventName: eventNameLocal,
       eventTime: (Math.floor(date.getTime() / 1000)).toString(),
-      isSilent: isSilentLocal.toString()
+      isSilent: isSilentLocal.toString(),
+      SnoozeDisabled: snoozeDisable.toString()
     };
 
 

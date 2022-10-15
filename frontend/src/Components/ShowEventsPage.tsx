@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getData } from "./FetchRequest";
-import { TimedEvent } from "../DataFormats/EventType";
+import { TimedEvent } from "../DataFormats/DataFormats";
 import { Card, DataTable, Text } from "grommet";
 import { Checkmark, Close, Trash, Unlink } from "grommet-icons";
 
