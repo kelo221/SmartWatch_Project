@@ -68,15 +68,7 @@ func FetchMultipleByID(ID int, ctx context.Context) (string, dbModels.EventSlice
 
 func DeleteEventByID(userID int, eventID int, ctx context.Context) string {
 
-	fmt.Println(userID, eventID)
-
-	_, err := dbModels.FindUser(ctx, db, userID)
-	if err != nil {
-		fmt.Println(err)
-		return err.Error()
-	}
-
-	_, err = dbModels.Events(qm.Where("id=? and userID=?", eventID, userID)).DeleteAll(ctx, db)
+	_, err := dbModels.Events(qm.Where("id=? and userID=?", eventID, userID)).DeleteAll(ctx, db)
 	if err != nil {
 		return err.Error()
 	}

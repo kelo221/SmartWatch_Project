@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { getData } from "./Services/FetchRequest";
+import { deleteDataWithBearer, getData } from "./Services/FetchRequest";
 import { TimedEvent } from "../DataFormats/DataFormats";
-import { Button, Card, DataTable, Text } from "grommet";
+import { Box, Button, Card, DataTable, Notification, Text } from "grommet";
 import { Checkmark, Close, Trash, Unlink } from "grommet-icons";
 import CreateEvent from "./CreateEvent";
+import { StatusType } from "grommet/components/Notification/index";
 
 type Props = {
   eventVisState: React.ComponentState;
@@ -13,8 +14,26 @@ type Props = {
 
 function MainPage(props: Props) {
 
+  const [loginSuccess, setLoginSuccess] = React.useState<StatusType>("normal");
+  const [alertMessage, setAlertMessage] = React.useState("");
+  const [visible, setVisible] = useState(false);
+
+  const onOpen = () => setVisible(true);
+  const onClose = () => setVisible(false);
+
+
   function deleteButtonHandler(id: number): void {
     console.log("hello", id);
+    deleteDataWithBearer("http://localhost:8000/api/user/event", { "eventID": id.toString() }).then((data) => {
+      if (!data.status) {
+        setLoginSuccess("normal");
+        setAlertMessage("OK! Event deleted.");
+      } else {
+        setLoginSuccess("critical");
+        onOpen();
+        setAlertMessage(data.errorText + " (" + data.status + "). Failed to delete.");
+      }
+    });
   }
 
 
@@ -31,9 +50,36 @@ function MainPage(props: Props) {
     });
   }, []);
 
+  if (events === null) {
+    return (
+
+      <><Box align="center" gap="small">
+        {visible && (
+          <Notification
+            toast={{ position: "top" }}
+            status={loginSuccess}
+            message={alertMessage}
+            onClose={onClose} />
+        )}
+      </Box><Card
+        margin="small"
+        gap="medium"
+        width="medium"
+        align="center"
+        justify="center"
+        fill
+      >
+
+        {props.eventVisState ?
+          <CreateEvent eventVisState={props.eventVisState} setEventVisState={props.setEventVisState}></CreateEvent> :
+          <></>}
+        Nothing here, create some events!</Card></>);
+  }
+
   if (!events.length) {
     return (
       <Card
+        pad={"small"}
         margin="small"
         gap="medium"
         width="medium"
@@ -43,7 +89,9 @@ function MainPage(props: Props) {
         fill
       >
         <Unlink></Unlink>
-        <Text>Check your connection, you may also have a stale bearer token. Log in again to fresh one.</Text>
+        <Text>Check your connection, you may also have a stale bearer token.</Text>
+        <Text>Log in again to get a a fresh one.</Text>
+
         <Button primary label="Log out" onClick={() => {
           (localStorage.removeItem("token"));
           window.location.replace(window.location.origin);
@@ -54,6 +102,18 @@ function MainPage(props: Props) {
 
   return (
     <>
+
+      <Box align="center" gap="small">
+        {visible && (
+          <Notification
+            toast={{ position: "top" }}
+            status={loginSuccess}
+            message={alertMessage}
+            onClose={onClose}
+          />
+        )}
+      </Box>
+
       <Card
         margin="small"
         gap="medium"
@@ -85,7 +145,7 @@ function MainPage(props: Props) {
               property: "eventtime",
               header: <Text>Event Date</Text>,
               render: datum => {
-                return <Text>{new Date(Date.parse(datum.eventtime.toLocaleString())).toLocaleString()}</Text>;
+                return <Text>{new Date(new Date(datum.eventtime).toISOString().slice(0, -1)).toLocaleString()}</Text>;
               }
             },
             {

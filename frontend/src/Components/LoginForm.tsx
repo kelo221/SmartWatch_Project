@@ -18,9 +18,8 @@ const LoginForm = () => {
 
   const [loginSuccess, setLoginSuccess] = React.useState<StatusType>("critical");
   const [alertMessage, setAlertMessage] = React.useState("");
-
-
   const [visible, setVisible] = useState(false);
+
   const onOpen = () => setVisible(true);
   const onClose = () => setVisible(false);
 
