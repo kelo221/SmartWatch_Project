@@ -22,6 +22,7 @@ func Setup(app *fiber.App) {
 
 	userRoute.Get("info", controllers.User)
 	userRoute.Post("event", controllers.NewEvent)
+	userRoute.Delete("event", controllers.DeleteEvent)
 	userRoute.Get("events", controllers.GetEvents)
 	/*	userRouteAuth.Post("logout", controllers.LogOut)
 		userRouteAuth.Put("info", controllers.UpdateInfo)

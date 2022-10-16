@@ -76,7 +76,7 @@ func TestInsert(t *testing.T) {
 // TestToOne tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToOne(t *testing.T) {
-	t.Run("EventToUserUsingEventidUser", testEventToOneUserUsingEventidUser)
+	t.Run("EventToUserUsingUseridUser", testEventToOneUserUsingUseridUser)
 }
 
 // TestOneToOne tests cannot be run in parallel
@@ -86,13 +86,13 @@ func TestOneToOne(t *testing.T) {}
 // TestToMany tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToMany(t *testing.T) {
-	t.Run("UserToEventidEvents", testUserToManyEventidEvents)
+	t.Run("UserToUseridEvents", testUserToManyUseridEvents)
 }
 
 // TestToOneSet tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToOneSet(t *testing.T) {
-	t.Run("EventToUserUsingEventidEvents", testEventToOneSetOpUserUsingEventidUser)
+	t.Run("EventToUserUsingUseridEvents", testEventToOneSetOpUserUsingUseridUser)
 }
 
 // TestToOneRemove tests cannot be run in parallel
@@ -110,7 +110,7 @@ func TestOneToOneRemove(t *testing.T) {}
 // TestToManyAdd tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToManyAdd(t *testing.T) {
-	t.Run("UserToEventidEvents", testUserToManyAddOpEventidEvents)
+	t.Run("UserToUseridEvents", testUserToManyAddOpUseridEvents)
 }
 
 // TestToManySet tests cannot be run in parallel

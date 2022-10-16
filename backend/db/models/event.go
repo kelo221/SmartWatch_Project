@@ -28,7 +28,7 @@ type Event struct {
 	Eventname      string    `boil:"eventname" json:"eventname" toml:"eventname" yaml:"eventname"`
 	Eventtime      time.Time `boil:"eventtime" json:"eventtime" toml:"eventtime" yaml:"eventtime"`
 	CreatedAt      null.Time `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
-	Eventid        int       `boil:"eventid" json:"eventid" toml:"eventid" yaml:"eventid"`
+	Userid         int       `boil:"userid" json:"userid" toml:"userid" yaml:"userid"`
 	Issilent       null.Bool `boil:"issilent" json:"issilent,omitempty" toml:"issilent" yaml:"issilent,omitempty"`
 	Snoozedisabled null.Bool `boil:"snoozedisabled" json:"snoozedisabled,omitempty" toml:"snoozedisabled" yaml:"snoozedisabled,omitempty"`
 
@@ -41,7 +41,7 @@ var EventColumns = struct {
 	Eventname      string
 	Eventtime      string
 	CreatedAt      string
-	Eventid        string
+	Userid         string
 	Issilent       string
 	Snoozedisabled string
 }{
@@ -49,7 +49,7 @@ var EventColumns = struct {
 	Eventname:      "eventname",
 	Eventtime:      "eventtime",
 	CreatedAt:      "created_at",
-	Eventid:        "eventid",
+	Userid:         "userid",
 	Issilent:       "issilent",
 	Snoozedisabled: "snoozedisabled",
 }
@@ -59,7 +59,7 @@ var EventTableColumns = struct {
 	Eventname      string
 	Eventtime      string
 	CreatedAt      string
-	Eventid        string
+	Userid         string
 	Issilent       string
 	Snoozedisabled string
 }{
@@ -67,7 +67,7 @@ var EventTableColumns = struct {
 	Eventname:      "event.eventname",
 	Eventtime:      "event.eventtime",
 	CreatedAt:      "event.created_at",
-	Eventid:        "event.eventid",
+	Userid:         "event.userid",
 	Issilent:       "event.issilent",
 	Snoozedisabled: "event.snoozedisabled",
 }
@@ -194,7 +194,7 @@ var EventWhere = struct {
 	Eventname      whereHelperstring
 	Eventtime      whereHelpertime_Time
 	CreatedAt      whereHelpernull_Time
-	Eventid        whereHelperint
+	Userid         whereHelperint
 	Issilent       whereHelpernull_Bool
 	Snoozedisabled whereHelpernull_Bool
 }{
@@ -202,21 +202,21 @@ var EventWhere = struct {
 	Eventname:      whereHelperstring{field: "\"event\".\"eventname\""},
 	Eventtime:      whereHelpertime_Time{field: "\"event\".\"eventtime\""},
 	CreatedAt:      whereHelpernull_Time{field: "\"event\".\"created_at\""},
-	Eventid:        whereHelperint{field: "\"event\".\"eventid\""},
+	Userid:         whereHelperint{field: "\"event\".\"userid\""},
 	Issilent:       whereHelpernull_Bool{field: "\"event\".\"issilent\""},
 	Snoozedisabled: whereHelpernull_Bool{field: "\"event\".\"snoozedisabled\""},
 }
 
 // EventRels is where relationship names are stored.
 var EventRels = struct {
-	EventidUser string
+	UseridUser string
 }{
-	EventidUser: "EventidUser",
+	UseridUser: "UseridUser",
 }
 
 // eventR is where relationships are stored.
 type eventR struct {
-	EventidUser *User `boil:"EventidUser" json:"EventidUser" toml:"EventidUser" yaml:"EventidUser"`
+	UseridUser *User `boil:"UseridUser" json:"UseridUser" toml:"UseridUser" yaml:"UseridUser"`
 }
 
 // NewStruct creates a new relationship struct
@@ -224,19 +224,19 @@ func (*eventR) NewStruct() *eventR {
 	return &eventR{}
 }
 
-func (r *eventR) GetEventidUser() *User {
+func (r *eventR) GetUseridUser() *User {
 	if r == nil {
 		return nil
 	}
-	return r.EventidUser
+	return r.UseridUser
 }
 
 // eventL is where Load methods for each relationship are stored.
 type eventL struct{}
 
 var (
-	eventAllColumns            = []string{"id", "eventname", "eventtime", "created_at", "eventid", "issilent", "snoozedisabled"}
-	eventColumnsWithoutDefault = []string{"eventname", "eventtime", "eventid"}
+	eventAllColumns            = []string{"id", "eventname", "eventtime", "created_at", "userid", "issilent", "snoozedisabled"}
+	eventColumnsWithoutDefault = []string{"eventname", "eventtime", "userid"}
 	eventColumnsWithDefault    = []string{"id", "created_at", "issilent", "snoozedisabled"}
 	eventPrimaryKeyColumns     = []string{"id"}
 	eventGeneratedColumns      = []string{}
@@ -540,10 +540,10 @@ func (q eventQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool
 	return count > 0, nil
 }
 
-// EventidUser pointed to by the foreign key.
-func (o *Event) EventidUser(mods ...qm.QueryMod) userQuery {
+// UseridUser pointed to by the foreign key.
+func (o *Event) UseridUser(mods ...qm.QueryMod) userQuery {
 	queryMods := []qm.QueryMod{
-		qm.Where("\"id\" = ?", o.Eventid),
+		qm.Where("\"id\" = ?", o.Userid),
 	}
 
 	queryMods = append(queryMods, mods...)
@@ -551,9 +551,9 @@ func (o *Event) EventidUser(mods ...qm.QueryMod) userQuery {
 	return Users(queryMods...)
 }
 
-// LoadEventidUser allows an eager lookup of values, cached into the
+// LoadUseridUser allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
-func (eventL) LoadEventidUser(ctx context.Context, e boil.ContextExecutor, singular bool, maybeEvent interface{}, mods queries.Applicator) error {
+func (eventL) LoadUseridUser(ctx context.Context, e boil.ContextExecutor, singular bool, maybeEvent interface{}, mods queries.Applicator) error {
 	var slice []*Event
 	var object *Event
 
@@ -584,7 +584,7 @@ func (eventL) LoadEventidUser(ctx context.Context, e boil.ContextExecutor, singu
 		if object.R == nil {
 			object.R = &eventR{}
 		}
-		args = append(args, object.Eventid)
+		args = append(args, object.Userid)
 
 	} else {
 	Outer:
@@ -594,12 +594,12 @@ func (eventL) LoadEventidUser(ctx context.Context, e boil.ContextExecutor, singu
 			}
 
 			for _, a := range args {
-				if a == obj.Eventid {
+				if a == obj.Userid {
 					continue Outer
 				}
 			}
 
-			args = append(args, obj.Eventid)
+			args = append(args, obj.Userid)
 
 		}
 	}
@@ -647,22 +647,22 @@ func (eventL) LoadEventidUser(ctx context.Context, e boil.ContextExecutor, singu
 
 	if singular {
 		foreign := resultSlice[0]
-		object.R.EventidUser = foreign
+		object.R.UseridUser = foreign
 		if foreign.R == nil {
 			foreign.R = &userR{}
 		}
-		foreign.R.EventidEvents = append(foreign.R.EventidEvents, object)
+		foreign.R.UseridEvents = append(foreign.R.UseridEvents, object)
 		return nil
 	}
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if local.Eventid == foreign.ID {
-				local.R.EventidUser = foreign
+			if local.Userid == foreign.ID {
+				local.R.UseridUser = foreign
 				if foreign.R == nil {
 					foreign.R = &userR{}
 				}
-				foreign.R.EventidEvents = append(foreign.R.EventidEvents, local)
+				foreign.R.UseridEvents = append(foreign.R.UseridEvents, local)
 				break
 			}
 		}
@@ -671,18 +671,18 @@ func (eventL) LoadEventidUser(ctx context.Context, e boil.ContextExecutor, singu
 	return nil
 }
 
-// SetEventidUserG of the event to the related item.
-// Sets o.R.EventidUser to related.
-// Adds o to related.R.EventidEvents.
+// SetUseridUserG of the event to the related item.
+// Sets o.R.UseridUser to related.
+// Adds o to related.R.UseridEvents.
 // Uses the global database handle.
-func (o *Event) SetEventidUserG(ctx context.Context, insert bool, related *User) error {
-	return o.SetEventidUser(ctx, boil.GetContextDB(), insert, related)
+func (o *Event) SetUseridUserG(ctx context.Context, insert bool, related *User) error {
+	return o.SetUseridUser(ctx, boil.GetContextDB(), insert, related)
 }
 
-// SetEventidUser of the event to the related item.
-// Sets o.R.EventidUser to related.
-// Adds o to related.R.EventidEvents.
-func (o *Event) SetEventidUser(ctx context.Context, exec boil.ContextExecutor, insert bool, related *User) error {
+// SetUseridUser of the event to the related item.
+// Sets o.R.UseridUser to related.
+// Adds o to related.R.UseridEvents.
+func (o *Event) SetUseridUser(ctx context.Context, exec boil.ContextExecutor, insert bool, related *User) error {
 	var err error
 	if insert {
 		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
@@ -692,7 +692,7 @@ func (o *Event) SetEventidUser(ctx context.Context, exec boil.ContextExecutor, i
 
 	updateQuery := fmt.Sprintf(
 		"UPDATE \"event\" SET %s WHERE %s",
-		strmangle.SetParamNames("\"", "\"", 1, []string{"eventid"}),
+		strmangle.SetParamNames("\"", "\"", 1, []string{"userid"}),
 		strmangle.WhereClause("\"", "\"", 2, eventPrimaryKeyColumns),
 	)
 	values := []interface{}{related.ID, o.ID}
@@ -706,21 +706,21 @@ func (o *Event) SetEventidUser(ctx context.Context, exec boil.ContextExecutor, i
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	o.Eventid = related.ID
+	o.Userid = related.ID
 	if o.R == nil {
 		o.R = &eventR{
-			EventidUser: related,
+			UseridUser: related,
 		}
 	} else {
-		o.R.EventidUser = related
+		o.R.UseridUser = related
 	}
 
 	if related.R == nil {
 		related.R = &userR{
-			EventidEvents: EventSlice{o},
+			UseridEvents: EventSlice{o},
 		}
 	} else {
-		related.R.EventidEvents = append(related.R.EventidEvents, o)
+		related.R.UseridEvents = append(related.R.UseridEvents, o)
 	}
 
 	return nil

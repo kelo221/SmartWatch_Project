@@ -494,7 +494,7 @@ func testEventsInsertWhitelist(t *testing.T) {
 	}
 }
 
-func testEventToOneUserUsingEventidUser(t *testing.T) {
+func testEventToOneUserUsingUseridUser(t *testing.T) {
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
@@ -514,12 +514,12 @@ func testEventToOneUserUsingEventidUser(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	local.Eventid = foreign.ID
+	local.Userid = foreign.ID
 	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
 
-	check, err := local.EventidUser().One(ctx, tx)
+	check, err := local.UseridUser().One(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -529,23 +529,23 @@ func testEventToOneUserUsingEventidUser(t *testing.T) {
 	}
 
 	slice := EventSlice{&local}
-	if err = local.L.LoadEventidUser(ctx, tx, false, (*[]*Event)(&slice), nil); err != nil {
+	if err = local.L.LoadUseridUser(ctx, tx, false, (*[]*Event)(&slice), nil); err != nil {
 		t.Fatal(err)
 	}
-	if local.R.EventidUser == nil {
+	if local.R.UseridUser == nil {
 		t.Error("struct should have been eager loaded")
 	}
 
-	local.R.EventidUser = nil
-	if err = local.L.LoadEventidUser(ctx, tx, true, &local, nil); err != nil {
+	local.R.UseridUser = nil
+	if err = local.L.LoadUseridUser(ctx, tx, true, &local, nil); err != nil {
 		t.Fatal(err)
 	}
-	if local.R.EventidUser == nil {
+	if local.R.UseridUser == nil {
 		t.Error("struct should have been eager loaded")
 	}
 }
 
-func testEventToOneSetOpUserUsingEventidUser(t *testing.T) {
+func testEventToOneSetOpUserUsingUseridUser(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
@@ -574,31 +574,31 @@ func testEventToOneSetOpUserUsingEventidUser(t *testing.T) {
 	}
 
 	for i, x := range []*User{&b, &c} {
-		err = a.SetEventidUser(ctx, tx, i != 0, x)
+		err = a.SetUseridUser(ctx, tx, i != 0, x)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if a.R.EventidUser != x {
+		if a.R.UseridUser != x {
 			t.Error("relationship struct not set to correct value")
 		}
 
-		if x.R.EventidEvents[0] != &a {
+		if x.R.UseridEvents[0] != &a {
 			t.Error("failed to append to foreign relationship struct")
 		}
-		if a.Eventid != x.ID {
-			t.Error("foreign key was wrong value", a.Eventid)
+		if a.Userid != x.ID {
+			t.Error("foreign key was wrong value", a.Userid)
 		}
 
-		zero := reflect.Zero(reflect.TypeOf(a.Eventid))
-		reflect.Indirect(reflect.ValueOf(&a.Eventid)).Set(zero)
+		zero := reflect.Zero(reflect.TypeOf(a.Userid))
+		reflect.Indirect(reflect.ValueOf(&a.Userid)).Set(zero)
 
 		if err = a.Reload(ctx, tx); err != nil {
 			t.Fatal("failed to reload", err)
 		}
 
-		if a.Eventid != x.ID {
-			t.Error("foreign key was wrong value", a.Eventid, x.ID)
+		if a.Userid != x.ID {
+			t.Error("foreign key was wrong value", a.Userid, x.ID)
 		}
 	}
 }
@@ -677,7 +677,7 @@ func testEventsSelect(t *testing.T) {
 }
 
 var (
-	eventDBTypes = map[string]string{`ID`: `integer`, `Eventname`: `character varying`, `Eventtime`: `timestamp without time zone`, `CreatedAt`: `timestamp without time zone`, `Eventid`: `integer`, `Issilent`: `boolean`, `Snoozedisabled`: `boolean`}
+	eventDBTypes = map[string]string{`ID`: `integer`, `Eventname`: `character varying`, `Eventtime`: `timestamp without time zone`, `CreatedAt`: `timestamp without time zone`, `Userid`: `integer`, `Issilent`: `boolean`, `Snoozedisabled`: `boolean`}
 	_            = bytes.MinRead
 )
 

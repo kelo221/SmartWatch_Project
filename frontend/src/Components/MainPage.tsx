@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getData } from "./Services/FetchRequest";
 import { TimedEvent } from "../DataFormats/DataFormats";
-import { Card, DataTable, Text } from "grommet";
+import { Button, Card, DataTable, Text } from "grommet";
 import { Checkmark, Close, Trash, Unlink } from "grommet-icons";
 import CreateEvent from "./CreateEvent";
 
@@ -43,7 +43,11 @@ function MainPage(props: Props) {
         fill
       >
         <Unlink></Unlink>
-        <Text>Check your connection</Text>
+        <Text>Check your connection, you may also have a stale bearer token. Log in again to fresh one.</Text>
+        <Button primary label="Log out" onClick={() => {
+          (localStorage.removeItem("token"));
+          window.location.replace(window.location.origin);
+        }} />
       </Card>
     );
   }

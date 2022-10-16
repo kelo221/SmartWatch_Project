@@ -65,14 +65,14 @@ var UserWhere = struct {
 
 // UserRels is where relationship names are stored.
 var UserRels = struct {
-	EventidEvents string
+	UseridEvents string
 }{
-	EventidEvents: "EventidEvents",
+	UseridEvents: "UseridEvents",
 }
 
 // userR is where relationships are stored.
 type userR struct {
-	EventidEvents EventSlice `boil:"EventidEvents" json:"EventidEvents" toml:"EventidEvents" yaml:"EventidEvents"`
+	UseridEvents EventSlice `boil:"UseridEvents" json:"UseridEvents" toml:"UseridEvents" yaml:"UseridEvents"`
 }
 
 // NewStruct creates a new relationship struct
@@ -80,11 +80,11 @@ func (*userR) NewStruct() *userR {
 	return &userR{}
 }
 
-func (r *userR) GetEventidEvents() EventSlice {
+func (r *userR) GetUseridEvents() EventSlice {
 	if r == nil {
 		return nil
 	}
-	return r.EventidEvents
+	return r.UseridEvents
 }
 
 // userL is where Load methods for each relationship are stored.
@@ -396,23 +396,23 @@ func (q userQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool,
 	return count > 0, nil
 }
 
-// EventidEvents retrieves all the event's Events with an executor via eventid column.
-func (o *User) EventidEvents(mods ...qm.QueryMod) eventQuery {
+// UseridEvents retrieves all the event's Events with an executor via userid column.
+func (o *User) UseridEvents(mods ...qm.QueryMod) eventQuery {
 	var queryMods []qm.QueryMod
 	if len(mods) != 0 {
 		queryMods = append(queryMods, mods...)
 	}
 
 	queryMods = append(queryMods,
-		qm.Where("\"event\".\"eventid\"=?", o.ID),
+		qm.Where("\"event\".\"userid\"=?", o.ID),
 	)
 
 	return Events(queryMods...)
 }
 
-// LoadEventidEvents allows an eager lookup of values, cached into the
+// LoadUseridEvents allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-M or N-M relationship.
-func (userL) LoadEventidEvents(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
+func (userL) LoadUseridEvents(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
 	var slice []*User
 	var object *User
 
@@ -467,7 +467,7 @@ func (userL) LoadEventidEvents(ctx context.Context, e boil.ContextExecutor, sing
 
 	query := NewQuery(
 		qm.From(`event`),
-		qm.WhereIn(`event.eventid in ?`, args...),
+		qm.WhereIn(`event.userid in ?`, args...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -498,24 +498,24 @@ func (userL) LoadEventidEvents(ctx context.Context, e boil.ContextExecutor, sing
 		}
 	}
 	if singular {
-		object.R.EventidEvents = resultSlice
+		object.R.UseridEvents = resultSlice
 		for _, foreign := range resultSlice {
 			if foreign.R == nil {
 				foreign.R = &eventR{}
 			}
-			foreign.R.EventidUser = object
+			foreign.R.UseridUser = object
 		}
 		return nil
 	}
 
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
-			if local.ID == foreign.Eventid {
-				local.R.EventidEvents = append(local.R.EventidEvents, foreign)
+			if local.ID == foreign.Userid {
+				local.R.UseridEvents = append(local.R.UseridEvents, foreign)
 				if foreign.R == nil {
 					foreign.R = &eventR{}
 				}
-				foreign.R.EventidUser = local
+				foreign.R.UseridUser = local
 				break
 			}
 		}
@@ -524,31 +524,31 @@ func (userL) LoadEventidEvents(ctx context.Context, e boil.ContextExecutor, sing
 	return nil
 }
 
-// AddEventidEventsG adds the given related objects to the existing relationships
+// AddUseridEventsG adds the given related objects to the existing relationships
 // of the user, optionally inserting them as new records.
-// Appends related to o.R.EventidEvents.
-// Sets related.R.EventidUser appropriately.
+// Appends related to o.R.UseridEvents.
+// Sets related.R.UseridUser appropriately.
 // Uses the global database handle.
-func (o *User) AddEventidEventsG(ctx context.Context, insert bool, related ...*Event) error {
-	return o.AddEventidEvents(ctx, boil.GetContextDB(), insert, related...)
+func (o *User) AddUseridEventsG(ctx context.Context, insert bool, related ...*Event) error {
+	return o.AddUseridEvents(ctx, boil.GetContextDB(), insert, related...)
 }
 
-// AddEventidEvents adds the given related objects to the existing relationships
+// AddUseridEvents adds the given related objects to the existing relationships
 // of the user, optionally inserting them as new records.
-// Appends related to o.R.EventidEvents.
-// Sets related.R.EventidUser appropriately.
-func (o *User) AddEventidEvents(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Event) error {
+// Appends related to o.R.UseridEvents.
+// Sets related.R.UseridUser appropriately.
+func (o *User) AddUseridEvents(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Event) error {
 	var err error
 	for _, rel := range related {
 		if insert {
-			rel.Eventid = o.ID
+			rel.Userid = o.ID
 			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
 				return errors.Wrap(err, "failed to insert into foreign table")
 			}
 		} else {
 			updateQuery := fmt.Sprintf(
 				"UPDATE \"event\" SET %s WHERE %s",
-				strmangle.SetParamNames("\"", "\"", 1, []string{"eventid"}),
+				strmangle.SetParamNames("\"", "\"", 1, []string{"userid"}),
 				strmangle.WhereClause("\"", "\"", 2, eventPrimaryKeyColumns),
 			)
 			values := []interface{}{o.ID, rel.ID}
@@ -562,25 +562,25 @@ func (o *User) AddEventidEvents(ctx context.Context, exec boil.ContextExecutor, 
 				return errors.Wrap(err, "failed to update foreign table")
 			}
 
-			rel.Eventid = o.ID
+			rel.Userid = o.ID
 		}
 	}
 
 	if o.R == nil {
 		o.R = &userR{
-			EventidEvents: related,
+			UseridEvents: related,
 		}
 	} else {
-		o.R.EventidEvents = append(o.R.EventidEvents, related...)
+		o.R.UseridEvents = append(o.R.UseridEvents, related...)
 	}
 
 	for _, rel := range related {
 		if rel.R == nil {
 			rel.R = &eventR{
-				EventidUser: o,
+				UseridUser: o,
 			}
 		} else {
-			rel.R.EventidUser = o
+			rel.R.UseridUser = o
 		}
 	}
 	return nil

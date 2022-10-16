@@ -7,12 +7,12 @@ CREATE TABLE "user"
 
 CREATE TABLE "event"
 (
-    id         serial primary key,
-    eventName  varchar   not null,
-    eventTime  timestamp not null UNIQUE,
-    created_at timestamp default now(),
-    eventId    int       not null,
-    isSilent   bool      default false,
-    snoozeDisabled   bool      default false,
-    constraint fk_event_id foreign key (eventId) references "user" (id)
+    id             serial primary key,
+    eventName      varchar   not null,
+    eventTime      timestamp not null UNIQUE,
+    created_at     timestamp default now(),
+    userID         int       not null,
+    isSilent       bool      default false,
+    snoozeDisabled bool      default false,
+    constraint fk_event_id foreign key (userID) references "user" (id)
 );

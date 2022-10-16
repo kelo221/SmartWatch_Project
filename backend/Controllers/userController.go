@@ -42,6 +42,42 @@ func GetEvents(c *fiber.Ctx) error {
 
 }
 
+func DeleteEvent(c *fiber.Ctx) error {
+
+	user := c.Locals("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	idString := claims["ID"].(float64)
+
+	var data map[string]string
+
+	if err := c.BodyParser(&data); err != nil {
+		println("parsing error")
+		return err
+	}
+
+	if data["eventID"] == "" {
+		c.Status(400)
+		return c.JSON(fiber.Map{
+			"message": "Missing alarm type (silent/loud)!",
+		})
+	}
+
+	eventID, err := strconv.ParseInt(data["eventID"], 10, 64)
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"message": "Malformed UnixTime for a new event!",
+		})
+	}
+
+	errString := databaseHandler.DeleteEventByID(int(idString), int(eventID), c.Context())
+	if errString != "" {
+		return c.JSON(fiber.Map{"error": errString})
+	}
+
+	return c.JSON(fiber.Map{"message": "Event Removed!"})
+
+}
+
 func NewEvent(c *fiber.Ctx) error {
 
 	user := c.Locals("user").(*jwt.Token)
@@ -98,7 +134,7 @@ func NewEvent(c *fiber.Ctx) error {
 	eventUnixTime := time.Unix(i, 0)
 
 	newEvent := dbModels.Event{
-		Eventid:        int(userID),
+		Userid:         int(userID),
 		Eventname:      data["eventName"],
 		Eventtime:      eventUnixTime,
 		Issilent:       null.Bool{Bool: alarmType},

@@ -494,7 +494,7 @@ func testUsersInsertWhitelist(t *testing.T) {
 	}
 }
 
-func testUserToManyEventidEvents(t *testing.T) {
+func testUserToManyUseridEvents(t *testing.T) {
 	var err error
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
@@ -519,8 +519,8 @@ func testUserToManyEventidEvents(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	b.Eventid = a.ID
-	c.Eventid = a.ID
+	b.Userid = a.ID
+	c.Userid = a.ID
 
 	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
@@ -529,17 +529,17 @@ func testUserToManyEventidEvents(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	check, err := a.EventidEvents().All(ctx, tx)
+	check, err := a.UseridEvents().All(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	bFound, cFound := false, false
 	for _, v := range check {
-		if v.Eventid == b.Eventid {
+		if v.Userid == b.Userid {
 			bFound = true
 		}
-		if v.Eventid == c.Eventid {
+		if v.Userid == c.Userid {
 			cFound = true
 		}
 	}
@@ -552,18 +552,18 @@ func testUserToManyEventidEvents(t *testing.T) {
 	}
 
 	slice := UserSlice{&a}
-	if err = a.L.LoadEventidEvents(ctx, tx, false, (*[]*User)(&slice), nil); err != nil {
+	if err = a.L.LoadUseridEvents(ctx, tx, false, (*[]*User)(&slice), nil); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(a.R.EventidEvents); got != 2 {
+	if got := len(a.R.UseridEvents); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
-	a.R.EventidEvents = nil
-	if err = a.L.LoadEventidEvents(ctx, tx, true, &a, nil); err != nil {
+	a.R.UseridEvents = nil
+	if err = a.L.LoadUseridEvents(ctx, tx, true, &a, nil); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(a.R.EventidEvents); got != 2 {
+	if got := len(a.R.UseridEvents); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
@@ -572,7 +572,7 @@ func testUserToManyEventidEvents(t *testing.T) {
 	}
 }
 
-func testUserToManyAddOpEventidEvents(t *testing.T) {
+func testUserToManyAddOpUseridEvents(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
@@ -609,7 +609,7 @@ func testUserToManyAddOpEventidEvents(t *testing.T) {
 	}
 
 	for i, x := range foreignersSplitByInsertion {
-		err = a.AddEventidEvents(ctx, tx, i != 0, x...)
+		err = a.AddUseridEvents(ctx, tx, i != 0, x...)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -617,28 +617,28 @@ func testUserToManyAddOpEventidEvents(t *testing.T) {
 		first := x[0]
 		second := x[1]
 
-		if a.ID != first.Eventid {
-			t.Error("foreign key was wrong value", a.ID, first.Eventid)
+		if a.ID != first.Userid {
+			t.Error("foreign key was wrong value", a.ID, first.Userid)
 		}
-		if a.ID != second.Eventid {
-			t.Error("foreign key was wrong value", a.ID, second.Eventid)
+		if a.ID != second.Userid {
+			t.Error("foreign key was wrong value", a.ID, second.Userid)
 		}
 
-		if first.R.EventidUser != &a {
+		if first.R.UseridUser != &a {
 			t.Error("relationship was not added properly to the foreign slice")
 		}
-		if second.R.EventidUser != &a {
+		if second.R.UseridUser != &a {
 			t.Error("relationship was not added properly to the foreign slice")
 		}
 
-		if a.R.EventidEvents[i*2] != first {
+		if a.R.UseridEvents[i*2] != first {
 			t.Error("relationship struct slice not set to correct value")
 		}
-		if a.R.EventidEvents[i*2+1] != second {
+		if a.R.UseridEvents[i*2+1] != second {
 			t.Error("relationship struct slice not set to correct value")
 		}
 
-		count, err := a.EventidEvents().Count(ctx, tx)
+		count, err := a.UseridEvents().Count(ctx, tx)
 		if err != nil {
 			t.Fatal(err)
 		}

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	_ "github.com/lib/pq"
 	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"log"
 )
 
@@ -30,7 +31,6 @@ func connectDB() *sql.DB {
 
 func CreateEvent(ctx context.Context, newEvent dbModels.Event) string {
 
-	fmt.Println(newEvent)
 	err := newEvent.InsertG(ctx, boil.Infer())
 	if err != nil {
 		fmt.Println(err)
@@ -58,10 +58,28 @@ func FetchMultipleByID(ID int, ctx context.Context) (string, dbModels.EventSlice
 		return err.Error(), nil
 	}
 
-	events, err := user.EventidEvents().AllG(ctx)
+	events, err := user.UseridEvents().AllG(ctx)
 	if err != nil {
 		return err.Error(), nil
 	}
 
 	return "", events
+}
+
+func DeleteEventByID(userID int, eventID int, ctx context.Context) string {
+
+	fmt.Println(userID, eventID)
+
+	_, err := dbModels.FindUser(ctx, db, userID)
+	if err != nil {
+		fmt.Println(err)
+		return err.Error()
+	}
+
+	_, err = dbModels.Events(qm.Where("id=? and userID=?", eventID, userID)).DeleteAll(ctx, db)
+	if err != nil {
+		return err.Error()
+	}
+
+	return ""
 }
