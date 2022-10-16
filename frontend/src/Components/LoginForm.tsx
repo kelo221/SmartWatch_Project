@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Box, Button, Form, FormField, Header, Heading, MaskedInput, Notification, TextInput } from "grommet";
 import { Link } from "react-router-dom";
-import { postData } from "./FetchRequest";
+import { postData } from "./Services/FetchRequest";
 import { StatusType } from "grommet/components/Notification/index";
 
 interface loginInterface {

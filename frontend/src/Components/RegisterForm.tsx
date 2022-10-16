@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Button, Form, FormField, Header, Heading, List, MaskedInput, Text, TextInput } from "grommet";
 import { Link } from "react-router-dom";
-import { postData } from "./FetchRequest";
+import { postData } from "./Services/FetchRequest";
 import { RegisterFormJSON } from "../DataFormats/DataFormats";
 
 const RegisterForm = () => {

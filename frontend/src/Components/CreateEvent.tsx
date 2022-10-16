@@ -1,10 +1,17 @@
 import { Box, Button, Card, CheckBox, DateInput, Form, FormField, MaskedInput } from "grommet";
 import React from "react";
 import { NewEventUpload } from "../DataFormats/DataFormats";
-import { postDataWithBearer } from "./FetchRequest";
+import { postDataWithBearer } from "./Services/FetchRequest";
+import { Close } from "grommet-icons";
 
 const hourRegex = /^\b2[0-3]\b|\b[0-1]?[0-9]\b$/;
 const minuteRegex = /^[0-5]?[0-9]$/;
+
+type Props = {
+  eventVisState: React.ComponentState;
+  setEventVisState: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
 
 const maskTime = [
   {
@@ -20,7 +27,7 @@ const maskTime = [
   }
 ];
 
-const CreateEventsPage = () => {
+const CreateEvent = (props: Props) => {
 
   const [eventNameLocal, setEventNameLocal] = React.useState("");
   const [isSilentLocal, setIsSilentLocal] = React.useState(false);
@@ -37,7 +44,6 @@ const CreateEventsPage = () => {
       SnoozeDisabled: snoozeDisable.toString()
     };
 
-
     postDataWithBearer("http://localhost:8000/api/user/event", newEvent).then((data) => {
       if (!data.status) {
         console.log("ok!");
@@ -45,19 +51,32 @@ const CreateEventsPage = () => {
         console.log("failed!!!", data.status);
       }
     });
-
   };
 
 
   return (
     <Card
-      margin="small"
-      gap="medium"
-      width="medium"
+      pad={"small"}
       align="center"
-      justify="center"
-      fill
+      style={{
+        position: "absolute",
+        zIndex: 2,
+        width: "300px",
+        height: "400px",
+        top: "100px"
+      }}
     >
+
+
+      <Close
+        style={{
+          position: "absolute",
+          right: "30px",
+          cursor: "pointer"
+        }}
+        onClick={() => props.setEventVisState(false)}
+      ></Close>
+
       <Form>
         <FormField
           label="Event Name"
@@ -91,14 +110,16 @@ const CreateEventsPage = () => {
           />
         </FormField>
 
-        <DateInput
-          format="yyyy-mm-dd"
-          value={date.toISOString().substring(0, 10)}
-          onChange={({ value }) => {
-            setDate(new Date(value[0].toString()));
-          }}
-        />
-
+        <Box>
+          <DateInput
+            height={"30px"}
+            format="yyyy-mm-dd"
+            value={date.toISOString().substring(0, 10)}
+            onChange={({ value }) => {
+              setDate(new Date(value[0].toString()));
+            }}
+          />
+        </Box>
 
         <FormField
           label="Options"
@@ -128,4 +149,4 @@ const CreateEventsPage = () => {
   );
 };
 
-export default CreateEventsPage;
+export default CreateEvent;

@@ -7,7 +7,6 @@ type Props = {
 
 const MainHeader = (props: Props) => {
 
-
   return (
     <Header background="brand" pad="small">
       <Nav direction="row">
@@ -15,10 +14,7 @@ const MainHeader = (props: Props) => {
           weight={"bold"} size={"large"}>Smartwatch Project</Text>
       </Nav>
       <Nav direction="row">
-        <Button primary label="Show Events" onClick={() => props.setState(true)} />
-      </Nav>
-      <Nav direction="row">
-        <Button primary label="Create A New Event" onClick={() => props.setState(false)} />
+        <Button primary label="Create A New Event" onClick={() => props.setState(true)} />
       </Nav>
       <Nav direction="row">
         <Clock type={"digital"} />

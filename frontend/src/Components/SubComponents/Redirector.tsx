@@ -1,28 +1,19 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
-import ShowEventsPage from "./ShowEventsPage";
-import CreateEventsPage from "./CreateEventsPage";
+import MainPage from "../MainPage";
 
 type Props = {
-  state: React.ComponentState;
+  eventVisState: React.ComponentState;
+  setEventVisState: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 
 function Redirector(props: Props) {
 
-  function mainPageRender() {
-    if (props.state) {
-      return (<ShowEventsPage />);
-    } else {
-      return (<CreateEventsPage />);
-    }
-
-  }
-
   return (
     <div>
       {localStorage.getItem("token") ? (
-        mainPageRender()
+        <MainPage eventVisState={props.eventVisState} setEventVisState={props.setEventVisState} />
       ) : (
         <Navigate to={{ pathname: "/login" }} />
       )}
