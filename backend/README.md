@@ -3,10 +3,24 @@
 * PostgreSQL
 * Golang 1.19.2 or newer
 
+
+## INIT Database
+
+```bash
+psql.exe -U postgres
+CREATE DATABASE smartwatch_project; \q
+psql.exe -U postgres -d smartwatch_project -f db/schema.sql
+```
+* OPTIONAL
+    * (for backend developement generate ORM: sqlboiler psql) 
+
+After the database has been initialized you may start the backend.
+
 ```bash
 cd backend
 go run .
 ```
+
 
 ## ENDPOINTS
 
@@ -34,13 +48,6 @@ go run .
    * ARRAY OF EVENTS
 
 
-## INIT Database
 
-1. psql.exe -U postgres
-2. CREATE DATABASE smartwatch_project; \q
-3. psql.exe -U postgres -d smartwatch_project -f db/schema.sql
-
-* OPTIONAL
-    * (for backend developement generate ORM: sqlboiler psql) 
 
 
