@@ -1,3 +1,13 @@
+## STARTING THE SERVER
+### REQUIREMENTS
+* PostgreSQL
+* Golang 1.19.2 or newer
+
+```bash
+cd backend
+go run .
+```
+
 ## ENDPOINTS
 
 * /api/login POST
