@@ -31,7 +31,7 @@ export async function fetchRequest(url = "", data = {}, method = "POST") {
     },
     redirect: "follow",
     referrerPolicy: "same-origin",
-    body: method == "GET" ? null : JSON.stringify(data)
+    body: method === "GET" ? null : JSON.stringify(data)
   });
 
   if (response.status !== 200) {

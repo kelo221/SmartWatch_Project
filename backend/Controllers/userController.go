@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/volatiletech/null/v8"
 	"strconv"
 	"time"
 )
@@ -158,14 +157,14 @@ func NewEvent(c *fiber.Ctx) error {
 	snoozeType, err := strconv.ParseBool(data["SnoozeDisabled"])
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"message": "Malformed alarm type for a new event!",
+			"message": "Malformed snooze setting for a new event!",
 		})
 	}
 
 	alarmType, err := strconv.ParseBool(data["isSilent"])
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"message": "Malformed snooze setting for a new event!",
+			"message": "Malformed alarm type for a new event!",
 		})
 	}
 
@@ -181,8 +180,8 @@ func NewEvent(c *fiber.Ctx) error {
 		Userid:         int(userID),
 		Eventname:      data["eventName"],
 		Eventtime:      eventUnixTime,
-		Issilent:       null.Bool{Bool: alarmType},
-		Snoozedisabled: null.Bool{Bool: snoozeType},
+		Issilent:       alarmType,
+		Snoozedisabled: snoozeType,
 	}
 
 	eventError := databaseHandler.CreateEvent(c.Context(), newEvent)

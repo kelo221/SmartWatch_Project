@@ -12,7 +12,6 @@ type Props = {
   setEventVisState: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-
 const maskTime = [
   {
     length: [1, 2],
@@ -37,6 +36,11 @@ const CreateEvent = (props: Props) => {
 
   const formatAndUpload = () => {
 
+
+    date.setHours(Number(timeString.split(":")[0]), Number(timeString.split(":")[1]), 0);
+
+    console.log(isSilentLocal);
+
     const newEvent: NewEventUpload = {
       eventName: eventNameLocal,
       eventTime: (Math.floor(date.getTime() / 1000)).toString(),
@@ -46,13 +50,15 @@ const CreateEvent = (props: Props) => {
 
     fetchRequest("http://localhost:8000/api/user/event", newEvent).then((data) => {
       if (!data.status) {
+        /// TODO
+        /// MOVE EVENTS OBJECT SO THAT THE PAGE DOES NOT NEED TO BE REFRESHED.
+        props.setEventVisState(false);
         console.log("ok!");
       } else {
         console.log("failed!!!", data.status);
       }
     });
   };
-
 
   return (
     <Card
@@ -66,8 +72,6 @@ const CreateEvent = (props: Props) => {
         top: "100px"
       }}
     >
-
-
       <Close
         style={{
           position: "absolute",
@@ -116,7 +120,10 @@ const CreateEvent = (props: Props) => {
             format="yyyy-mm-dd"
             value={date.toISOString().substring(0, 10)}
             onChange={({ value }) => {
-              setDate(new Date(value[0].toString()));
+
+              if (value.length) {
+                setDate(new Date(value[0].toString()));
+              }
             }}
           />
         </Box>
@@ -140,7 +147,14 @@ const CreateEvent = (props: Props) => {
 
 
         <Box direction="row" gap="small" pad={"small"}>
-          <Button type="submit" label="Send to Smartwatch" primary onClick={() => formatAndUpload()} />
+          <Button type="submit" label="Send to Smartwatch" primary onClick={() => {
+            if (eventNameLocal !== "") {
+              formatAndUpload();
+            } else {
+              /// TODO
+              console.log("implement a check for the empty field");
+            }
+          }} />
           <Button type="reset" label="Reset" />
         </Box>
       </Form>

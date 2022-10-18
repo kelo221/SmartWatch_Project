@@ -29,8 +29,8 @@ type Event struct {
 	Eventtime      time.Time `boil:"eventtime" json:"eventtime" toml:"eventtime" yaml:"eventtime"`
 	CreatedAt      null.Time `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
 	Userid         int       `boil:"userid" json:"userid" toml:"userid" yaml:"userid"`
-	Issilent       null.Bool `boil:"issilent" json:"issilent,omitempty" toml:"issilent" yaml:"issilent,omitempty"`
-	Snoozedisabled null.Bool `boil:"snoozedisabled" json:"snoozedisabled,omitempty" toml:"snoozedisabled" yaml:"snoozedisabled,omitempty"`
+	Issilent       bool      `boil:"issilent" json:"issilent" toml:"issilent" yaml:"issilent"`
+	Snoozedisabled bool      `boil:"snoozedisabled" json:"snoozedisabled" toml:"snoozedisabled" yaml:"snoozedisabled"`
 
 	R *eventR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L eventL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -165,29 +165,14 @@ func (w whereHelpernull_Time) GTE(x null.Time) qm.QueryMod {
 func (w whereHelpernull_Time) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
 func (w whereHelpernull_Time) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
-type whereHelpernull_Bool struct{ field string }
+type whereHelperbool struct{ field string }
 
-func (w whereHelpernull_Bool) EQ(x null.Bool) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_Bool) NEQ(x null.Bool) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_Bool) LT(x null.Bool) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_Bool) LTE(x null.Bool) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_Bool) GT(x null.Bool) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_Bool) GTE(x null.Bool) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
-func (w whereHelpernull_Bool) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_Bool) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 
 var EventWhere = struct {
 	ID             whereHelperint
@@ -195,16 +180,16 @@ var EventWhere = struct {
 	Eventtime      whereHelpertime_Time
 	CreatedAt      whereHelpernull_Time
 	Userid         whereHelperint
-	Issilent       whereHelpernull_Bool
-	Snoozedisabled whereHelpernull_Bool
+	Issilent       whereHelperbool
+	Snoozedisabled whereHelperbool
 }{
 	ID:             whereHelperint{field: "\"event\".\"id\""},
 	Eventname:      whereHelperstring{field: "\"event\".\"eventname\""},
 	Eventtime:      whereHelpertime_Time{field: "\"event\".\"eventtime\""},
 	CreatedAt:      whereHelpernull_Time{field: "\"event\".\"created_at\""},
 	Userid:         whereHelperint{field: "\"event\".\"userid\""},
-	Issilent:       whereHelpernull_Bool{field: "\"event\".\"issilent\""},
-	Snoozedisabled: whereHelpernull_Bool{field: "\"event\".\"snoozedisabled\""},
+	Issilent:       whereHelperbool{field: "\"event\".\"issilent\""},
+	Snoozedisabled: whereHelperbool{field: "\"event\".\"snoozedisabled\""},
 }
 
 // EventRels is where relationship names are stored.
