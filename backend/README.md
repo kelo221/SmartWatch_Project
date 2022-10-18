@@ -1,5 +1,5 @@
-## STARTING THE SERVER
-### REQUIREMENTS
+# STARTING THE SERVER
+## REQUIREMENTS
 * PostgreSQL
 * Golang 1.19.2 or newer
 
@@ -22,30 +22,34 @@ go run .
 ```
 
 
-## ENDPOINTS
+# ENDPOINTS
 
 * /api/login POST
    * {"username": "test",	"password": "test"}
    * {"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNjY2MjEwNzQ1LCJ1c2VybmFtZSI6InRlc3QifQ.8PWstjzN8SD5lORNWAmAh1NBCGVL9GugE67rtzJN1NA"}
 
-* /api/register
+* /api/register POST
    * {"username": "test",	"password": "test","password_confirm": "test"}
    * {"message": "Registered!"}
 
-* /api/user/event **BEARER NEEDED**
+  ## SECURED ROUTER, BEARER NEEDED
+
+* /api/user/event **POST**
    * {"eventName": "newUnix", "eventTime": "1665997920","isSilent": "true","SnoozeDisabled": "false"}
    * {"message": "New event Added!"}
 
-* /api/user/event **BEARER NEEDED**
-   * {"eventName": "newUnix", "eventTime": "1665997920","isSilent": "true","SnoozeDisabled": "false"}
-   * {"message": "New event Added!"}
-
-* /api/user/event **BEARER NEEDED**
+* /api/user/event **DELETE**
    * {"eventID": "1"}
    * {"message": "Event Removed!"}
    
- * /api/user/events **BEARER NEEDED**
+* /api/user/event **GET**
    * ARRAY OF EVENTS
+   
+* /api/user/event **DELETE**
+   * {"eventID": "11", "eventTime": "1666095688"}
+   * {"message": "Event time updated!"}
+   
+
 
 
 
