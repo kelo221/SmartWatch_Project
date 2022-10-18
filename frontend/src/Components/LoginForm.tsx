@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Box, Button, Form, FormField, Header, Heading, MaskedInput, Notification, TextInput } from "grommet";
 import { Link } from "react-router-dom";
-import { postData } from "./Services/FetchRequest";
+import { fetchRequestNoBearer } from "./Services/FetchRequest";
 import { StatusType } from "grommet/components/Notification/index";
 
 interface loginInterface {
@@ -33,17 +33,17 @@ const LoginForm = () => {
   };
 
     const onSubmit = (value: loginInterface) => {
-        postData("http://localhost:8000/api/login", value).then((data) => {
-            if (!data.status) {
-              onOpen();
-              setLoginSuccess("normal");
-              setAlertMessage("OK! Redirecting...");
-              localStorage.setItem("token", data["token"]);
-              window.location.replace(window.location.origin);
-            } else {
-              onOpen();
-              setAlertMessage(data.errorText + " (" + data.status + "). Incorrect credentials.");
-              setFormValues({ password: "", username: "" });
+      fetchRequestNoBearer("http://localhost:8000/api/login", value).then((data) => {
+        if (!data.status) {
+          onOpen();
+          setLoginSuccess("normal");
+          setAlertMessage("OK! Redirecting...");
+          localStorage.setItem("token", data["token"]);
+          window.location.replace(window.location.origin);
+        } else {
+          onOpen();
+          setAlertMessage(data.errorText + " (" + data.status + "). Incorrect credentials.");
+          setFormValues({ password: "", username: "" });
             }
         });
     }

@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Button, Form, FormField, Header, Heading, List, MaskedInput, Text, TextInput } from "grommet";
 import { Link } from "react-router-dom";
-import { postData } from "./Services/FetchRequest";
+import { fetchRequestNoBearer } from "./Services/FetchRequest";
 import { RegisterFormJSON } from "../DataFormats/DataFormats";
 
 const RegisterForm = () => {
@@ -30,7 +30,7 @@ const RegisterForm = () => {
         password_confirm: value.passwordConfirm
       };
 
-      postData("http://localhost:8000/api/register", registerFormPost).then((data) => {
+      fetchRequestNoBearer("http://localhost:8000/api/register", registerFormPost).then((data) => {
         if (!data.status) {
           console.log("ok!");
           window.location.replace(window.location.origin + "/login");

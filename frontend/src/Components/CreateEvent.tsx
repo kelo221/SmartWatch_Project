@@ -1,7 +1,7 @@
 import { Box, Button, Card, CheckBox, DateInput, Form, FormField, MaskedInput } from "grommet";
 import React from "react";
 import { NewEventUpload } from "../DataFormats/DataFormats";
-import { postDataWithBearer } from "./Services/FetchRequest";
+import { fetchRequest } from "./Services/FetchRequest";
 import { Close } from "grommet-icons";
 
 const hourRegex = /^\b2[0-3]\b|\b[0-1]?[0-9]\b$/;
@@ -44,7 +44,7 @@ const CreateEvent = (props: Props) => {
       SnoozeDisabled: snoozeDisable.toString()
     };
 
-    postDataWithBearer("http://localhost:8000/api/user/event", newEvent).then((data) => {
+    fetchRequest("http://localhost:8000/api/user/event", newEvent).then((data) => {
       if (!data.status) {
         console.log("ok!");
       } else {

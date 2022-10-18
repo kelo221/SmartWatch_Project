@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { deleteDataWithBearer, getData } from "./Services/FetchRequest";
+import { fetchRequest } from "./Services/FetchRequest";
 import { TimedEvent } from "../DataFormats/DataFormats";
 import { Box, Button, Card, DataTable, Notification, Text } from "grommet";
 import { Checkmark, Close, Trash, Unlink } from "grommet-icons";
@@ -18,10 +18,8 @@ function MainPage(props: Props) {
   const [alertMessage, setAlertMessage] = React.useState("hello nothing here");
   const [visible, setVisible] = useState(false);
 
-
-
   function deleteButtonHandler(id: number): void {
-    deleteDataWithBearer("http://localhost:8000/api/user/event", { "eventID": id.toString() }).then((data) => {
+    fetchRequest("http://localhost:8000/api/user/event", { "eventID": id.toString() }, "DELETE").then((data) => {
       if (!data.status) {
         setLoginSuccess("normal");
         setAlertMessage("OK! Event deleted.");
@@ -34,11 +32,10 @@ function MainPage(props: Props) {
     });
   }
 
-
   const [events, setEvents] = useState<TimedEvent[]>({} as TimedEvent[]);
 
   useEffect(() => {
-    getData("http://localhost:8000/api/user/events").then((data) => {
+    fetchRequest("http://localhost:8000/api/user/events", {}, "GET").then((data) => {
       if (!data.status) {
         let jsonObject = JSON.parse(data) as TimedEvent[];
         setEvents(jsonObject);
@@ -101,8 +98,6 @@ function MainPage(props: Props) {
 
   return (
     <>
-
-
       {visible && (
         <>
           <Box align="center" gap="small">
@@ -114,8 +109,6 @@ function MainPage(props: Props) {
           </Box>
         </>
       )}
-
-
       <Card
         margin="small"
         gap="medium"
@@ -124,13 +117,10 @@ function MainPage(props: Props) {
         justify="center"
         fill
       >
-
         {props.eventVisState ?
           <CreateEvent eventVisState={props.eventVisState} setEventVisState={props.setEventVisState}></CreateEvent> :
           <></>
         }
-
-
         <DataTable
           style={
             {
