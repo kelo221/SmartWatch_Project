@@ -15,23 +15,21 @@ type Props = {
 function MainPage(props: Props) {
 
   const [loginSuccess, setLoginSuccess] = React.useState<StatusType>("normal");
-  const [alertMessage, setAlertMessage] = React.useState("");
+  const [alertMessage, setAlertMessage] = React.useState("hello nothing here");
   const [visible, setVisible] = useState(false);
 
-  const onOpen = () => setVisible(true);
-  const onClose = () => setVisible(false);
 
 
   function deleteButtonHandler(id: number): void {
-    console.log("hello", id);
     deleteDataWithBearer("http://localhost:8000/api/user/event", { "eventID": id.toString() }).then((data) => {
       if (!data.status) {
         setLoginSuccess("normal");
         setAlertMessage("OK! Event deleted.");
+        setVisible(true);
       } else {
         setLoginSuccess("critical");
-        onOpen();
         setAlertMessage(data.errorText + " (" + data.status + "). Failed to delete.");
+        setVisible(true);
       }
     });
   }
@@ -59,7 +57,7 @@ function MainPage(props: Props) {
             toast={{ position: "top" }}
             status={loginSuccess}
             message={alertMessage}
-            onClose={onClose} />
+            onClose={() => setVisible(false)} />
         )}
       </Box><Card
         margin="small"
@@ -103,16 +101,19 @@ function MainPage(props: Props) {
   return (
     <>
 
-      <Box align="center" gap="small">
-        {visible && (
-          <Notification
-            toast={{ position: "top" }}
-            status={loginSuccess}
-            message={alertMessage}
-            onClose={onClose}
-          />
-        )}
-      </Box>
+
+      {visible && (
+        <>
+          <Box align="center" gap="small">
+            <Notification
+              toast={{ position: "top" }}
+              status={loginSuccess}
+              message={alertMessage}
+              onClose={() => setVisible(false)} />
+          </Box>
+        </>
+      )}
+
 
       <Card
         margin="small"
@@ -152,7 +153,7 @@ function MainPage(props: Props) {
               property: "passed",
               header: <Text>Passed?</Text>,
               render: datum => {
-                if ((Date.parse(datum.eventtime.toLocaleString())) < (new Date().valueOf())) {
+                if (new Date(new Date(datum.eventtime).toISOString().slice(0, -1)).valueOf() < (new Date().valueOf())) {
                   return <Checkmark></Checkmark>;
                 } else {
                   return <Close></Close>;
