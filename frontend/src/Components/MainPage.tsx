@@ -87,13 +87,14 @@ function MainPage(props: Props) {
         fill
       >
         <Unlink></Unlink>
-        <Text>Check your connection, you may also have a stale bearer token.</Text>
-        <Text>Log in again to get a a fresh one.</Text>
-
-        <Button primary label="Log out" onClick={() => {
-          (localStorage.removeItem("token"));
-          window.location.replace(window.location.origin);
-        }} />
+        <Text>Check your connection.</Text>
+        {localStorage.getItem("token") ? (
+          <><Text>Log in again to get a fresh bearer token.</Text><Button primary label="Log out" onClick={() => {
+            (localStorage.removeItem("token"));
+            window.location.replace(window.location.origin);
+          }} /></>
+        ) : <></>
+        }
       </Card>
     );
   }
