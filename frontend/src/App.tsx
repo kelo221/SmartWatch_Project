@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Grommet, Page, PageContent } from "grommet";
 
 import { hpe } from "grommet-theme-hpe";

@@ -22,7 +22,7 @@ const RegisterForm = () => {
         console.log(values)
     }
 
-    const onSubmit = (value: any, touched: any) => {
+    const onSubmit = (value: any) => {
 
       const registerFormPost: RegisterFormJSON = {
         username: value.username,
@@ -62,14 +62,14 @@ const RegisterForm = () => {
             </Header>
             <Box pad={{ horizontal: 'xxsmall' }}>
                 <Form
-                    validate="blur"
-                    value={formValues}
-                    messages={{
+                  validate="blur"
+                  value={formValues}
+                  messages={{
                         required: 'This is a required field.',
                     }}
-                    onChange={(nextValue) => onChange(nextValue)}
-                    onSubmit={({ value, touched }) => onSubmit(value, touched)}
-                    method="post"
+                  onChange={(nextValue) => onChange(nextValue)}
+                  onSubmit={({ value }) => onSubmit(value)}
+                  method="post"
                 >
                     <FormField
                         label="Username"
