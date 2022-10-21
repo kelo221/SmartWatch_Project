@@ -4,8 +4,6 @@ import (
 	databaseHandler "SmartWatch_Project/db"
 	dbModels "SmartWatch_Project/db/models"
 	"context"
-	"fmt"
-
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
 	"log"
@@ -80,8 +78,6 @@ func Login(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	fmt.Println(user.Username)
-
 	if err := comparePasswords(user.Password, []byte(data["password"])); err != nil {
 		c.Status(fiber.StatusBadRequest)
 		return c.JSON(fiber.Map{
@@ -108,98 +104,3 @@ func Login(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"token": t})
 
 }
-
-/*func User(c *fiber.Ctx) error {
-
-	id, _ := middlewares.GetUserID(c)
-
-	dbQuery := fmt.Sprintf("FOR r IN Users FILTER r._id == \"%s\" RETURN r", id)
-	user := database.AqlReturnUser(dbQuery)
-	user.Password = nil
-
-	return c.JSON(user)
-
-}
-
-func LogOut(c *fiber.Ctx) error {
-
-	cookie := fiber.Cookie{
-		Name:     "jwt",
-		Value:    "",
-		Expires:  time.Now().Add(-time.Hour),
-		HTTPOnly: true,
-		SameSite: "None",
-	}
-
-	c.Cookie(&cookie)
-
-	return c.JSON(fiber.Map{
-		"message": "Logged out.",
-	})
-}
-
-func UpdateInfo(c *fiber.Ctx) error {
-
-	var data map[string]string
-
-	if err := c.BodyParser(&data); err != nil {
-		println("parsing error")
-		return err
-	}
-
-	id, _ := middlewares.GetUserID(c)
-
-	user := models.User{
-		FirstName: data["first_name"],
-		LastName:  data["last_name"],
-		Email:     data["email"],
-	}
-
-	newUser, err := json.Marshal(user)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	println(newUser)
-
-	dbQuery := fmt.Sprintf("UPDATE DOCUMENT(\"%s\") WITH %s IN Users", id, newUser)
-	println(dbQuery)
-	database.AqlNoReturn(dbQuery)
-
-	return c.JSON(user)
-}
-
-func UpdatePassword(c *fiber.Ctx) error {
-
-	var data map[string]string
-
-	if err := c.BodyParser(&data); err != nil {
-		return err
-	}
-
-	if data["password"] != data["password_confirm"] {
-		c.Status(400)
-		return c.JSON(fiber.Map{
-			"message": "passwords do not match",
-		})
-	}
-
-	id, _ := middlewares.GetUserID(c)
-
-	var user models.User
-
-	user.SetPassword(data["password"])
-
-	newUser, err := json.Marshal(user)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	dbQuery := fmt.Sprintf("UPDATE DOCUMENT(\"%s\") WITH %s IN Users", id, newUser)
-	database.AqlNoReturn(dbQuery)
-
-	return c.JSON(fiber.Map{
-		"message": "Success.",
-	})
-}
-*/

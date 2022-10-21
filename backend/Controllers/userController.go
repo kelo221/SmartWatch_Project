@@ -1,11 +1,15 @@
 package controllers
 
 import (
+	"SmartWatch_Project/ProtoBuffers"
 	databaseHandler "SmartWatch_Project/db"
 	dbModels "SmartWatch_Project/db/models"
+	"encoding/hex"
 	"encoding/json"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"strconv"
 	"time"
 )
@@ -38,6 +42,40 @@ func GetEvents(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(string(b))
+
+}
+
+func GetEventsProto(c *fiber.Ctx) error {
+
+	user := c.Locals("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	idString := claims["ID"].(float64)
+
+	err, eventsQ := databaseHandler.FetchMultipleByID(int(idString), c.Context())
+	if err != "" {
+		return c.Status(400).JSON(fiber.Map{"error": err})
+	}
+
+	p := ProtoBuffers.Events{
+		Events: []*ProtoBuffers.EventsOneEvent{},
+	}
+
+	for _, j := range eventsQ {
+		event := ProtoBuffers.EventsOneEvent{
+			Id:             uint32(j.ID),
+			EventName:      j.Eventname,
+			Eventtime:      timestamppb.New(j.Eventtime),
+			CreatedAt:      timestamppb.New(j.CreatedAt.Time),
+			UserId:         uint32(j.Userid),
+			IsSilent:       j.Issilent,
+			SnoozeDisabled: j.Snoozedisabled,
+		}
+		p.Events = append(p.Events, &event)
+	}
+
+	out, _ := proto.Marshal(&p)
+
+	return c.JSON(hex.EncodeToString(out))
 
 }
 

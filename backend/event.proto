@@ -1,0 +1,36 @@
+syntax = "proto3";
+package main;
+import "google/protobuf/timestamp.proto";
+option go_package = "./ProtoBuffers;";
+
+// protoc --go_out=. .\event.proto
+/*
+message Events {
+
+  message Event {
+    uint32 id = 1;
+    optional   string eventName = 2;
+    google.protobuf.Timestamp eventtime = 3;
+    optional   google.protobuf.Timestamp created_at = 4;
+    optional    uint32 userId = 5;
+    optional   bool isSilent = 6;
+    optional  bool snoozeDisabled = 7;
+  }
+
+  repeated Event items = 1;
+}*/
+
+message Events {
+
+  message oneEvent {
+    uint32 id = 1;
+    string eventName = 2;
+    google.protobuf.Timestamp eventtime = 3;
+    google.protobuf.Timestamp created_at = 4;
+    uint32 userId = 5;
+    bool isSilent = 6;
+    bool snoozeDisabled = 7;
+  }
+
+  repeated oneEvent events = 4;
+}

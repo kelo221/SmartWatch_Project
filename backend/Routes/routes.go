@@ -14,18 +14,23 @@ func Setup(app *fiber.App) {
 	api.Post("login", controllers.Login)
 
 	userRoute := api.Group("user")
+	protoBuff := api.Group("proto")
 
 	// JWT Middleware
 	userRoute.Use(jwtware.New(jwtware.Config{
 		SigningKey: []byte("secret"),
 	}))
 
-	userRoute.Get("info", controllers.User)
+	protoBuff.Use(jwtware.New(jwtware.Config{
+		SigningKey: []byte("secret"),
+	}))
 
+	userRoute.Get("info", controllers.User)
 	userRoute.Post("event", controllers.NewEvent)
 	userRoute.Delete("event", controllers.DeleteEvent)
 	userRoute.Patch("event", controllers.ChangeEventTime)
-
 	userRoute.Get("events", controllers.GetEvents)
+
+	protoBuff.Get("events", controllers.GetEventsProto)
 
 }
