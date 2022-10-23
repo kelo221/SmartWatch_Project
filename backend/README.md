@@ -24,7 +24,9 @@ go run .
 
 # ROUTES
 
-## api/login (POST)
+## JSON
+
+### api/login (POST)
    INPUT
 ```json
    {"username": "test",	"password": "test"}
@@ -34,7 +36,7 @@ go run .
    {"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNjY2MjEwNzQ1LCJ1c2VybmFtZSI6InRlc3QifQ.8PWstjzN8SD5lORNWAmAh1NBCGVL9GugE67rtzJN1NA"}
 ```
 
-## /api/register (POST)
+### /api/register (POST)
    INPUT
 ```json
   {"username": "test",	"password": "test","password_confirm": "test"}
