@@ -47,8 +47,15 @@ go run .
 
  # SECURED ROUTES, BEARER NEEDED
 
+## JSON
 
-## /api/user/event (POST)
+### /api/user/event (GET)
+
+   OUTPUT
+```json
+[{"id":1,"eventname":"newUnix","eventtime":"1970-01-01T02:20:33Z","created_at":"2022-10-18T13:26:11.536961Z","userid":1,"issilent":false,"snoozedisabled":false},{"id":3,"eventname":"newUnix","eventtime":"1970-01-01T05:25:34Z","created_at":"2022-10-18T13:26:21.909119Z","userid":1,"issilent":true,"snoozedisabled":true}]
+```
+### /api/user/event (POST)
    INPUT
 ```json
 {"eventName": "newUnix", "eventTime": "1665997920","isSilent": "true","SnoozeDisabled": "false"}
@@ -58,7 +65,7 @@ go run .
 {"message": "New event Added!"}
 ```
 
-## /api/user/event (DELETE)
+### /api/user/event (DELETE)
    INPUT
 ```json
 {"eventID": "1"}
@@ -68,16 +75,7 @@ go run .
 {"message": "Event Removed!"}
 ```
 
-## /api/user/event (GET)
-
-   OUTPUT
-```json
-[{"id":1,"eventname":"newUnix","eventtime":"1970-01-01T02:20:33Z","created_at":"2022-10-18T13:26:11.536961Z","userid":1,"issilent":false,"snoozedisabled":false},{"id":3,"eventname":"newUnix","eventtime":"1970-01-01T05:25:34Z","created_at":"2022-10-18T13:26:21.909119Z","userid":1,"issilent":true,"snoozedisabled":true}]
-```
-
-
-
-## /api/user/event (PATCH)
+### /api/user/event (PATCH)
    INPUT
 ```json
 {"eventID": "11", "eventTime": "1666095688"}
@@ -87,7 +85,54 @@ go run .
 {"message": "Event time updated!"}
 ```
 
+<br/>
+
+## PROTOBUFFER
+
+### /api/proto/event/ (GET)
+
+   OUTPUT
+```
+2220080112076e6577556e69781a0308f141220c08f3d2ba9a0610e8bf85800228012225080312076e6577556e69781a0408ce9801220c08fdd2ba9a0610989cc0b103280130013801
+```
+
+### /api/proto/debug/ (GET)
+Returns an example protobuffer object.
+
+   OUTPUT
+```
+0806120b6a2e4576656e746e616d651a02080122020801280b30013801
+```
 
 
+### /api/proto/event/:protobufferHex (POST)
+   INPUT
+```
+http://localhost:8000/api/proto/event/0806120b6a2e4576656e746e616d651a02080122020801280b30013801
+```
+   OUTPUT
+```json
+{"message": "New event Added!"}
+```
 
+### /api/proto/event/:protobufferHex (DELETE)
+   INPUT
+```
+http://localhost:8000/api/proto/event/0806120b6a2e4576656e746e616d651a02080122020801280b30013801
+```
+   OUTPUT
+```json
+{"message": "Event Removed!"}
+```
+
+
+### /api/proto/event/:protobufferHex (PATCH)
+   INPUT
+```
+http://localhost:8000/api/proto/event/0806120b6a2e4576656e746e616d651a02080122020801280b30013801
+```
+   OUTPUT
+```json
+{"message": "Event time updated!"}
+```
 
