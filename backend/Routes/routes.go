@@ -20,17 +20,20 @@ func Setup(app *fiber.App) {
 	userRoute.Use(jwtware.New(jwtware.Config{
 		SigningKey: []byte("secret"),
 	}))
-
 	protoBuff.Use(jwtware.New(jwtware.Config{
 		SigningKey: []byte("secret"),
 	}))
 
-	userRoute.Get("info", controllers.User)
+	userRoute.Get("events", controllers.GetEvents)
 	userRoute.Post("event", controllers.NewEvent)
 	userRoute.Delete("event", controllers.DeleteEvent)
 	userRoute.Patch("event", controllers.ChangeEventTime)
-	userRoute.Get("events", controllers.GetEvents)
 
 	protoBuff.Get("events", controllers.GetEventsProto)
+	protoBuff.Post("event/:bytes", controllers.NewEventProto)
+	protoBuff.Patch("event/:bytes", controllers.ChangeEventTimeProto)
+	protoBuff.Delete("event/:bytes", controllers.DeleteEventProto)
+
+	protoBuff.Get("debug", controllers.Debug)
 
 }

@@ -69,7 +69,12 @@ func FetchMultipleByID(ID int, ctx context.Context) (string, dbModels.EventSlice
 
 func DeleteEventByID(userID int, eventID int, ctx context.Context) string {
 
-	_, err := dbModels.Events(qm.Where("id=? and userID=?", eventID, userID)).DeleteAll(ctx, db)
+	queryResultCount, err := dbModels.Events(qm.Where("id=? and userID=?", eventID, userID)).DeleteAll(ctx, db)
+
+	if queryResultCount == 0 {
+		return "Deletion failed!"
+	}
+
 	if err != nil {
 		return err.Error()
 	}
@@ -79,7 +84,10 @@ func DeleteEventByID(userID int, eventID int, ctx context.Context) string {
 
 func UpdateEventTime(userID int, eventID int, newTime time.Time, ctx context.Context) string {
 
-	_, err := dbModels.Events(qm.Where("id=? and userID=?", eventID, userID)).UpdateAll(ctx, db, dbModels.M{"eventtime": newTime})
+	queryResultCount, err := dbModels.Events(qm.Where("id=? and userID=?", eventID, userID)).UpdateAll(ctx, db, dbModels.M{"eventtime": newTime})
+	if queryResultCount == 0 {
+		return "Update failed!"
+	}
 	if err != nil {
 		return err.Error()
 	}
