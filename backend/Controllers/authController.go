@@ -1,3 +1,4 @@
+// Package controllers Handles authentication of users and the validity of bearer tokens.
 package controllers
 
 import (

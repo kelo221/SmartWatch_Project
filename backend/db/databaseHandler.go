@@ -1,3 +1,4 @@
+// Package dbHandler takes care of communicating with PostgresSQL
 package dbHandler
 
 import (
@@ -14,6 +15,7 @@ import (
 
 var db *sql.DB
 
+// ConnectToDB Establishes connection to a db variable that is used for database related requests with SQLBoiler.
 func ConnectToDB() {
 
 	db = connectDB()
@@ -30,6 +32,7 @@ func connectDB() *sql.DB {
 	return db
 }
 
+// CreateEvent Pushes an event to the database.
 func CreateEvent(ctx context.Context, newEvent dbModels.Event) string {
 
 	err := newEvent.InsertG(ctx, boil.Infer())
@@ -41,6 +44,7 @@ func CreateEvent(ctx context.Context, newEvent dbModels.Event) string {
 	return ""
 }
 
+// CreateUser Pushes an user to the database.
 func CreateUser(user dbModels.User) string {
 
 	err := user.Insert(context.Background(), db, boil.Infer())
@@ -52,6 +56,7 @@ func CreateUser(user dbModels.User) string {
 	return ""
 }
 
+// FetchMultipleByID Fetches all events that match the user id, return a slice of events.
 func FetchMultipleByID(ID int, ctx context.Context) (string, dbModels.EventSlice) {
 
 	user, err := dbModels.Users(dbModels.UserWhere.ID.EQ(ID)).OneG(ctx)
@@ -67,21 +72,20 @@ func FetchMultipleByID(ID int, ctx context.Context) (string, dbModels.EventSlice
 	return "", events
 }
 
+// DeleteEventByID Deletes an event that match the user id and the given id.
 func DeleteEventByID(userID int, eventID int, ctx context.Context) string {
 
 	queryResultCount, err := dbModels.Events(qm.Where("id=? and userID=?", eventID, userID)).DeleteAll(ctx, db)
-
 	if queryResultCount == 0 {
 		return "Deletion failed!"
 	}
-
 	if err != nil {
 		return err.Error()
 	}
-
 	return ""
 }
 
+// UpdateEventTime Updates an event with a new time.
 func UpdateEventTime(userID int, eventID int, newTime time.Time, ctx context.Context) string {
 
 	queryResultCount, err := dbModels.Events(qm.Where("id=? and userID=?", eventID, userID)).UpdateAll(ctx, db, dbModels.M{"eventtime": newTime})
