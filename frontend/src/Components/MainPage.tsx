@@ -5,6 +5,7 @@ import { Box, Button, Card, DataTable, Notification, Text } from "grommet";
 import { Checkmark, Close, Trash, Unlink } from "grommet-icons";
 import CreateEvent from "./CreateEvent";
 import { StatusType } from "grommet/components/Notification/index";
+import { eventStore } from "../Store/store";
 
 type Props = {
   eventVisState: React.ComponentState;
@@ -12,17 +13,49 @@ type Props = {
 };
 
 
+function padTo2Digits(num: number) {
+  return num.toString().padStart(2, "0");
+}
+
+function formatDate(date: Date) {
+  return (
+    [
+      date.getFullYear(),
+      padTo2Digits(date.getMonth() + 1),
+      padTo2Digits(date.getDate())
+    ].join("-") +
+    " " +
+    [
+      padTo2Digits(date.getHours()),
+      padTo2Digits(date.getMinutes()),
+      padTo2Digits(date.getSeconds())
+    ].join(":")
+  );
+}
+
+
+/// TODO
+// Check if there's a way to get the id so that the delete function works, or maybe just change it to delete by a
+// specific date instead of the id, as that is unique as well
+// Make a separate store for popups? to clean up the codebase a bit?
+
 function MainPage(props: Props) {
 
   const [loginSuccess, setLoginSuccess] = React.useState<StatusType>("normal");
   const [alertMessage, setAlertMessage] = React.useState("hello nothing here");
   const [visible, setVisible] = useState(false);
 
-  function deleteButtonHandler(id: number): void {
-    fetchRequest("http://localhost:8000/api/user/event", { "eventID": id.toString() }, "DELETE").then((data) => {
+  const { removeEvent, events, initEvents } = eventStore();
+
+  function deleteButtonHandler(id: number, date: Date): void {
+
+    const fixedHours = new Date(date).setHours(new Date(date).getHours() - 2);
+
+    fetchRequest("http://localhost:8000/api/user/eventDate", { "eventDate": formatDate(new Date(fixedHours)).toString() }, "DELETE").then((data) => {
       if (!data.status) {
         setLoginSuccess("normal");
         setAlertMessage("OK! Event deleted.");
+        removeEvent(id);
         setVisible(true);
       } else {
         setLoginSuccess("critical");
@@ -32,13 +65,12 @@ function MainPage(props: Props) {
     });
   }
 
-  const [events, setEvents] = useState<TimedEvent[]>({} as TimedEvent[]);
 
   useEffect(() => {
     fetchRequest("http://localhost:8000/api/user/events", {}, "GET").then((data) => {
       if (!data.status) {
         let jsonObject = JSON.parse(data) as TimedEvent[];
-        setEvents(jsonObject);
+        initEvents(jsonObject);
       } else {
         console.log("failed!!!", data.status);
       }
@@ -167,7 +199,7 @@ function MainPage(props: Props) {
               header: <Text>Delete?</Text>,
               render: datum => {
                 return (
-                  <span onClick={() => deleteButtonHandler(datum.id)}
+                  <span onClick={() => deleteButtonHandler(datum.id, datum.eventtime)}
                         id={datum.id.toString()}
                   >
                 <Trash style={{ cursor: "pointer" }}></Trash>

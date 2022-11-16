@@ -3,6 +3,8 @@ import React from "react";
 import { NewEventUpload } from "../DataFormats/DataFormats";
 import { fetchRequest } from "./Services/FetchRequest";
 import { Close } from "grommet-icons";
+import { eventStore } from "../Store/store";
+
 
 const hourRegex = /^\b2[0-3]\b|\b[0-1]?[0-9]\b$/;
 const minuteRegex = /^[0-5]?[0-9]$/;
@@ -34,12 +36,13 @@ const CreateEvent = (props: Props) => {
   const [date, setDate] = React.useState(new Date());
   const [timeString, setTimeString] = React.useState("");
 
+  const { addEvent } = eventStore();
+
   const formatAndUpload = () => {
 
 
     date.setHours(Number(timeString.split(":")[0]), Number(timeString.split(":")[1]), 0);
 
-    console.log(isSilentLocal);
 
     const newEvent: NewEventUpload = {
       eventName: eventNameLocal,
@@ -50,10 +53,16 @@ const CreateEvent = (props: Props) => {
 
     fetchRequest("http://localhost:8000/api/user/event", newEvent).then((data) => {
       if (!data.status) {
-        /// TODO
-        /// MOVE EVENTS OBJECT SO THAT THE PAGE DOES NOT NEED TO BE REFRESHED.
         props.setEventVisState(false);
-        console.log("ok!");
+        addEvent({
+          id: 0,
+          created_at: new Date(),
+          eventtime: new Date(date.getTime() + 7200000), // add two hours for timezone offset
+          eventid: 0,
+          eventname: eventNameLocal,
+          issilent: isSilentLocal
+
+        });
       } else {
         console.log("failed!!!", data.status);
       }

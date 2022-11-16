@@ -72,6 +72,19 @@ func FetchMultipleByID(ID int, ctx context.Context) (string, dbModels.EventSlice
 	return "", events
 }
 
+// DeleteEventByDate Deletes an event that match the user id and the given id.
+func DeleteEventByDate(userID int, eventDate string, ctx context.Context) string {
+
+	queryResultCount, err := dbModels.Events(qm.Where("eventtime=? and userID=?", eventDate, userID)).DeleteAll(ctx, db)
+	if queryResultCount == 0 {
+		return "Deletion failed!"
+	}
+	if err != nil {
+		return err.Error()
+	}
+	return ""
+}
+
 // DeleteEventByID Deletes an event that match the user id and the given id.
 func DeleteEventByID(userID int, eventID int, ctx context.Context) string {
 

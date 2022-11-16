@@ -4,6 +4,7 @@ import (
 	databaseHandler "SmartWatch_Project/db"
 	dbModels "SmartWatch_Project/db/models"
 	"encoding/json"
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"strconv"
@@ -72,6 +73,37 @@ func ChangeEventTime(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{"message": "Event time updated!"})
+
+}
+
+func DeleteEventDate(c *fiber.Ctx) error {
+
+	user := c.Locals("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	idString := claims["ID"].(float64)
+
+	var data map[string]string
+
+	fmt.Println(data)
+
+	if err := c.BodyParser(&data); err != nil {
+		println("parsing error")
+		return err
+	}
+
+	if data["eventDate"] == "" {
+		c.Status(400)
+		return c.Status(400).JSON(fiber.Map{
+			"message": "Missing eventDate!",
+		})
+	}
+
+	errString := databaseHandler.DeleteEventByDate(int(idString), data["eventDate"], c.Context())
+	if errString != "" {
+		return c.Status(400).JSON(fiber.Map{"error": errString})
+	}
+
+	return c.JSON(fiber.Map{"message": "Event Removed!"})
 
 }
 
