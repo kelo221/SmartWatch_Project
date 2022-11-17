@@ -4,12 +4,13 @@ import (
 	databaseHandler "SmartWatch_Project/db"
 	dbModels "SmartWatch_Project/db/models"
 	"encoding/json"
-	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"strconv"
 	"time"
 )
+
+var UTC, _ = time.LoadLocation("UTC")
 
 func GetEvents(c *fiber.Ctx) error {
 
@@ -29,6 +30,78 @@ func GetEvents(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(string(b))
+
+}
+
+func ChangeEvent(c *fiber.Ctx) error {
+
+	user := c.Locals("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	userID := claims["ID"].(float64)
+	var data map[string]string
+
+	if err := c.BodyParser(&data); err != nil {
+		println("parsing error")
+		return err
+	}
+
+	if data["eventName"] == "" || data["eventTimeOld"] == "" {
+		c.Status(400)
+		return c.Status(400).JSON(fiber.Map{
+			"message": "Missing event name or event time!",
+		})
+	}
+
+	if data["isSilent"] == "" {
+		c.Status(400)
+		return c.Status(400).JSON(fiber.Map{
+			"message": "Missing alarm type (silent/loud)!",
+		})
+	}
+
+	if data["SnoozeDisabled"] == "" {
+		c.Status(400)
+		return c.Status(400).JSON(fiber.Map{
+			"message": "Missing snooze info!",
+		})
+	}
+
+	snoozeType, err := strconv.ParseBool(data["SnoozeDisabled"])
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"message": "Malformed snooze setting for a new event!",
+		})
+	}
+
+	alarmType, err := strconv.ParseBool(data["isSilent"])
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"message": "Malformed alarm type for a new event!",
+		})
+	}
+
+	i, err := strconv.ParseInt(data["eventTimeNewUnix"], 10, 64)
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"message": "Malformed UnixTime for a new event!",
+		})
+	}
+	eventTimeNewUnix := time.Unix(i, 0).In(UTC)
+
+	newEvent := dbModels.Event{
+		Userid:         int(userID),
+		Eventname:      data["eventName"],
+		Eventtime:      eventTimeNewUnix,
+		Issilent:       alarmType,
+		Snoozedisabled: snoozeType,
+	}
+
+	errString := databaseHandler.UpdateEvent(int(userID), data["eventTimeOld"], newEvent, c.Context())
+	if errString != "" {
+		return c.Status(400).JSON(fiber.Map{"error": errString})
+	}
+
+	return c.JSON(fiber.Map{"message": "Event time updated!"})
 
 }
 
@@ -65,7 +138,8 @@ func ChangeEventTime(c *fiber.Ctx) error {
 			"message": "Malformed UnixTime for a new event!",
 		})
 	}
-	eventUnixTime := time.Unix(i, 0)
+
+	eventUnixTime := time.Unix(i, 0).In(UTC)
 
 	errString := databaseHandler.UpdateEventTime(int(idString), int(eventID), eventUnixTime, c.Context())
 	if errString != "" {
@@ -83,8 +157,6 @@ func DeleteEventDate(c *fiber.Ctx) error {
 	idString := claims["ID"].(float64)
 
 	var data map[string]string
-
-	fmt.Println(data)
 
 	if err := c.BodyParser(&data); err != nil {
 		println("parsing error")
@@ -196,7 +268,7 @@ func NewEvent(c *fiber.Ctx) error {
 			"message": "Malformed UnixTime for a new event!",
 		})
 	}
-	eventUnixTime := time.Unix(i, 0)
+	eventUnixTime := time.Unix(i, 0).In(UTC)
 
 	newEvent := dbModels.Event{
 		Userid:         int(userID),

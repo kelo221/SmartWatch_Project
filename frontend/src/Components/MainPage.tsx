@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { fetchRequest } from "./Services/FetchRequest";
 import { TimedEvent } from "../DataFormats/DataFormats";
 import { Box, Button, Card, DataTable, Notification, Text } from "grommet";
-import { Checkmark, Close, Trash, Unlink } from "grommet-icons";
+import { Checkmark, Close, Plan, Trash, Unlink } from "grommet-icons";
 import CreateEvent from "./CreateEvent";
-import { StatusType } from "grommet/components/Notification/index";
-import { eventStore } from "../Store/store";
+import { eventStore } from "../Stores/eventStore";
+import { notificationStore } from "../Stores/notificationStore";
 
 type Props = {
   eventVisState: React.ComponentState;
@@ -33,34 +33,30 @@ function formatDate(date: Date) {
   );
 }
 
-
-/// TODO
-// Check if there's a way to get the id so that the delete function works, or maybe just change it to delete by a
-// specific date instead of the id, as that is unique as well
-// Make a separate store for popups? to clean up the codebase a bit?
-
 function MainPage(props: Props) {
 
-  const [loginSuccess, setLoginSuccess] = React.useState<StatusType>("normal");
-  const [alertMessage, setAlertMessage] = React.useState("hello nothing here");
-  const [visible, setVisible] = useState(false);
-
   const { removeEvent, events, initEvents } = eventStore();
+
+  const {
+    setNotificationVis, setNotificationAlertLevel, notificationAlertLevel,
+    notificationText, notificationVisibility, setNotificationText
+  } = notificationStore();
 
   function deleteButtonHandler(id: number, date: Date): void {
 
     const fixedHours = new Date(date).setHours(new Date(date).getHours() - 2);
 
     fetchRequest("http://localhost:8000/api/user/eventDate", { "eventDate": formatDate(new Date(fixedHours)).toString() }, "DELETE").then((data) => {
+
+      setNotificationVis(true);
+
       if (!data.status) {
-        setLoginSuccess("normal");
-        setAlertMessage("OK! Event deleted.");
+        setNotificationAlertLevel("normal");
+        setNotificationText("OK! Event deleted.");
         removeEvent(id);
-        setVisible(true);
       } else {
-        setLoginSuccess("critical");
-        setAlertMessage(data.errorText + " (" + data.status + "). Failed to delete.");
-        setVisible(true);
+        setNotificationAlertLevel("critical");
+        setNotificationText(data.errorText + " (" + data.status + "). Failed to delete.");
       }
     });
   }
@@ -81,12 +77,12 @@ function MainPage(props: Props) {
     return (
 
       <><Box align="center" gap="small">
-        {visible && (
+        {notificationVisibility && (
           <Notification
             toast={{ position: "top" }}
-            status={loginSuccess}
-            message={alertMessage}
-            onClose={() => setVisible(false)} />
+            status={notificationAlertLevel}
+            message={notificationText}
+            onClose={() => setNotificationVis(true)} />
         )}
       </Box><Card
         margin="small"
@@ -130,14 +126,14 @@ function MainPage(props: Props) {
 
   return (
     <>
-      {visible && (
+      {notificationVisibility && (
         <>
           <Box align="center" gap="small">
             <Notification
               toast={{ position: "top" }}
-              status={loginSuccess}
-              message={alertMessage}
-              onClose={() => setVisible(false)} />
+              status={notificationAlertLevel}
+              message={notificationText}
+              onClose={() => setNotificationVis(true)} />
           </Box>
         </>
       )}
@@ -169,14 +165,14 @@ function MainPage(props: Props) {
               property: "eventtime",
               header: <Text>Event Date</Text>,
               render: datum => {
-                return <Text>{new Date(new Date(datum.eventtime).toISOString().slice(0, -1)).toLocaleString()}</Text>;
+                return <Text>{new Date(datum.eventtime).toLocaleString()}</Text>;
               }
             },
             {
               property: "passed",
               header: <Text>Passed?</Text>,
               render: datum => {
-                if (new Date(new Date(datum.eventtime).toISOString().slice(0, -1)).valueOf() < (new Date().valueOf())) {
+                if (new Date(new Date(datum.eventtime)).valueOf() < (new Date().valueOf())) {
                   return <Checkmark></Checkmark>;
                 } else {
                   return <Close></Close>;
@@ -192,6 +188,18 @@ function MainPage(props: Props) {
                 } else {
                   return <Close></Close>;
                 }
+              }
+            },
+            {
+              property: "changeTime",
+              header: <Text>Modify Time?</Text>,
+              render: datum => {
+                return (
+                  <span onClick={() => deleteButtonHandler(datum.id, datum.eventtime)}
+                        id={datum.id.toString()}
+                  >
+                <Plan style={{ cursor: "pointer" }}></Plan>
+                </span>);
               }
             },
             {

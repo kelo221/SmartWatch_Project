@@ -1,16 +1,15 @@
-// @ts-ignore
 import create from "zustand";
 import { TimedEvent } from "../DataFormats/DataFormats";
 
 
-interface BearState {
+interface timedEventInterface {
   events: TimedEvent[];
   addEvent: (newEvent: TimedEvent) => void;
   initEvents: (newEvents: TimedEvent[]) => void;
   removeEvent: (id: number) => void;
 }
 
-export const eventStore = create<BearState>()((set) => ({
+export const eventStore = create<timedEventInterface>()((set) => ({
 
   events: [],
 
@@ -25,7 +24,7 @@ export const eventStore = create<BearState>()((set) => ({
     }));
   },
   initEvents: (newEvents: TimedEvent[]) => {
-    set((state) => ({
+    set(() => ({
       events: [
         ...newEvents
       ]

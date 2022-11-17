@@ -28,7 +28,8 @@ func Setup(app *fiber.App) {
 	userRoute.Post("event", controllers.NewEvent)
 	userRoute.Delete("event", controllers.DeleteEvent)
 	userRoute.Delete("eventDate", controllers.DeleteEventDate)
-	userRoute.Patch("event", controllers.ChangeEventTime)
+	userRoute.Patch("eventTime", controllers.ChangeEventTime)
+	userRoute.Patch("event", controllers.ChangeEvent)
 
 	protoBuff.Get("events", controllers.GetEventsProto)
 	protoBuff.Post("event/:bytes", controllers.NewEventProto)

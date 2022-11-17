@@ -111,3 +111,23 @@ func UpdateEventTime(userID int, eventID int, newTime time.Time, ctx context.Con
 
 	return ""
 }
+
+// UpdateEvent Updates an event.
+func UpdateEvent(userID int, eventDate string, newEvent dbModels.Event, ctx context.Context) string {
+
+	queryResultCount, err := dbModels.Events(qm.Where("eventtime=? and userID=?", eventDate, userID)).UpdateAll(ctx, db,
+		dbModels.M{
+			"eventtime":      newEvent.Eventtime,
+			"eventname":      newEvent.Eventname,
+			"issilent":       newEvent.Issilent,
+			"snoozedisabled": newEvent.Snoozedisabled,
+		})
+	if queryResultCount == 0 {
+		return "Update failed!"
+	}
+	if err != nil {
+		return err.Error()
+	}
+	return ""
+
+}

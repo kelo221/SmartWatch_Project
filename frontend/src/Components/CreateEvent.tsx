@@ -3,7 +3,8 @@ import React from "react";
 import { NewEventUpload } from "../DataFormats/DataFormats";
 import { fetchRequest } from "./Services/FetchRequest";
 import { Close } from "grommet-icons";
-import { eventStore } from "../Store/store";
+import { eventStore } from "../Stores/eventStore";
+import { notificationStore } from "../Stores/notificationStore";
 
 
 const hourRegex = /^\b2[0-3]\b|\b[0-1]?[0-9]\b$/;
@@ -38,6 +39,8 @@ const CreateEvent = (props: Props) => {
 
   const { addEvent } = eventStore();
 
+  const { setNotificationVis, setNotificationAlertLevel, setNotificationText } = notificationStore();
+
   const formatAndUpload = () => {
 
 
@@ -51,20 +54,26 @@ const CreateEvent = (props: Props) => {
       SnoozeDisabled: snoozeDisable.toString()
     };
 
+    console.log(newEvent);
+
     fetchRequest("http://localhost:8000/api/user/event", newEvent).then((data) => {
+      setNotificationVis(true);
       if (!data.status) {
+        setNotificationAlertLevel("normal");
+        setNotificationText("OK! Event created.");
         props.setEventVisState(false);
         addEvent({
           id: 0,
           created_at: new Date(),
-          eventtime: new Date(date.getTime() + 7200000), // add two hours for timezone offset
+          eventtime: new Date(date.getTime()),
           eventid: 0,
           eventname: eventNameLocal,
           issilent: isSilentLocal
 
         });
       } else {
-        console.log("failed!!!", data.status);
+        setNotificationAlertLevel("critical");
+        setNotificationText(data.errorText + " (" + data.status + "). Failed to create.");
       }
     });
   };

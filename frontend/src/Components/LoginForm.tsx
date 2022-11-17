@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { Box, Button, Form, FormField, Header, Heading, MaskedInput, Notification, TextInput } from "grommet";
 import { Link } from "react-router-dom";
 import { fetchRequestNoBearer } from "./Services/FetchRequest";
-import { StatusType } from "grommet/components/Notification/index";
+import { notificationStore } from "../Stores/notificationStore";
 
 interface loginInterface {
   username: string;
@@ -15,13 +15,10 @@ const LoginForm = () => {
     password: ""
   });
 
-
-  const [loginSuccess, setLoginSuccess] = React.useState<StatusType>("critical");
-  const [alertMessage, setAlertMessage] = React.useState("");
-  const [visible, setVisible] = useState(false);
-
-  const onOpen = () => setVisible(true);
-  const onClose = () => setVisible(false);
+  const {
+    setNotificationVis, setNotificationAlertLevel, notificationAlertLevel,
+    notificationText, notificationVisibility, setNotificationText
+  } = notificationStore();
 
   const onChange = (
     values: React.SetStateAction<{
@@ -34,17 +31,19 @@ const LoginForm = () => {
 
     const onSubmit = (value: loginInterface) => {
       fetchRequestNoBearer("http://localhost:8000/api/login", value).then((data) => {
+
+        setNotificationVis(true);
+
         if (!data.status) {
-          onOpen();
-          setLoginSuccess("normal");
-          setAlertMessage("OK! Redirecting...");
+          setNotificationAlertLevel("normal");
+          setNotificationText("OK! Redirecting...");
           localStorage.setItem("token", data["token"]);
           window.location.replace(window.location.origin);
         } else {
-          onOpen();
-          setAlertMessage(data.errorText + " (" + data.status + "). Incorrect credentials.");
+          setNotificationAlertLevel("warning");
+          setNotificationText(data.errorText + " (" + data.status + "). Incorrect credentials.");
           setFormValues({ password: "", username: "" });
-            }
+        }
         });
     }
 
@@ -52,12 +51,12 @@ const LoginForm = () => {
       <>
 
         <Box align="center" gap="small">
-          {visible && (
+          {notificationVisibility && (
             <Notification
               toast={{ position: "top" }}
-              status={loginSuccess}
-              message={alertMessage}
-              onClose={onClose}
+              status={notificationAlertLevel}
+              message={notificationText}
+              onClose={() => setNotificationVis(true)}
             />
           )}
         </Box>
