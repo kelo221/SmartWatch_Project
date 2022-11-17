@@ -67,10 +67,12 @@ go run .
 {"message": "New event Added!"}
 ```
 
-### /api/user/event (DELETE)
+### /api/user/eventDate (DELETE)
    INPUT
 ```json
-{"eventID": "1"}
+{
+	"eventDate": "1970-01-01 05:25:34"
+}
 ```
    OUTPUT
 ```json
@@ -80,7 +82,13 @@ go run .
 ### /api/user/event (PATCH)
    INPUT
 ```json
-{"eventID": "11", "eventTime": "1666095688"}
+{
+	"eventName": "newUnixMod",
+	"eventTimeOld": "1970-01-01 00:02:03",
+	"eventTimeNewUnix": "1000",
+	"isSilent": "true",
+	"SnoozeDisabled": "true"
+}
 ```
    OUTPUT
 ```json
