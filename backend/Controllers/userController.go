@@ -45,7 +45,7 @@ func ChangeEvent(c *fiber.Ctx) error {
 		return err
 	}
 
-	if data["eventName"] == "" || data["eventTimeOld"] == "" {
+	if data["eventName"] == "" || data["eventTimeOldUnix"] == "" {
 		c.Status(400)
 		return c.Status(400).JSON(fiber.Map{
 			"message": "Missing event name or event time!",
@@ -86,6 +86,13 @@ func ChangeEvent(c *fiber.Ctx) error {
 			"message": "Malformed UnixTime for a new event!",
 		})
 	}
+
+	if i > 2068690600000 {
+		return c.Status(400).JSON(fiber.Map{
+			"message": "Malformed UnixTime for a new event!",
+		})
+	}
+
 	eventTimeNewUnix := time.Unix(i, 0).In(UTC)
 
 	newEvent := dbModels.Event{
@@ -96,7 +103,7 @@ func ChangeEvent(c *fiber.Ctx) error {
 		Snoozedisabled: snoozeType,
 	}
 
-	errString := databaseHandler.UpdateEvent(int(userID), data["eventTimeOld"], newEvent, c.Context())
+	errString := databaseHandler.UpdateEvent(int(userID), data["eventTimeOldUnix"], newEvent, c.Context())
 	if errString != "" {
 		return c.Status(400).JSON(fiber.Map{"error": errString})
 	}
@@ -139,7 +146,13 @@ func ChangeEventTime(c *fiber.Ctx) error {
 		})
 	}
 
-	eventUnixTime := time.Unix(i, 0).In(UTC)
+	eventUnixTime := time.Unix(i, 0)
+
+	if eventUnixTime.Unix() > 2068725233 {
+		return c.Status(400).JSON(fiber.Map{
+			"message": "Malformed UnixTime for a new event!",
+		})
+	}
 
 	errString := databaseHandler.UpdateEventTime(int(idString), int(eventID), eventUnixTime, c.Context())
 	if errString != "" {
@@ -268,7 +281,14 @@ func NewEvent(c *fiber.Ctx) error {
 			"message": "Malformed UnixTime for a new event!",
 		})
 	}
+
 	eventUnixTime := time.Unix(i, 0).In(UTC)
+
+	if i > 2068690600000 {
+		return c.Status(400).JSON(fiber.Map{
+			"message": "Malformed UnixTime for a new event!",
+		})
+	}
 
 	newEvent := dbModels.Event{
 		Userid:         int(userID),
@@ -278,7 +298,7 @@ func NewEvent(c *fiber.Ctx) error {
 		Snoozedisabled: snoozeType,
 	}
 
-	eventError := databaseHandler.CreateEvent(c.Context(), newEvent)
+	eventError := databaseHandler.NewEventPopUp(c.Context(), newEvent)
 
 	if eventError != "" {
 		c.Status(fiber.StatusConflict)

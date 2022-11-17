@@ -125,7 +125,7 @@ func NewEventProto(c *fiber.Ctx) error {
 		Snoozedisabled: newEventProto.SnoozeDisabled,
 	}
 
-	eventError := databaseHandler.CreateEvent(c.Context(), newEvent)
+	eventError := databaseHandler.NewEventPopUp(c.Context(), newEvent)
 
 	if eventError != "" {
 		c.Status(fiber.StatusConflict)

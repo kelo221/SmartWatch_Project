@@ -4,7 +4,7 @@ export interface TimedEvent {
   eventtime: Date;
   created_at: Date;
   eventid: number;
-  issilent: boolean | null;
+  issilent: boolean;
 }
 
 export interface NewEventUpload {
@@ -13,6 +13,15 @@ export interface NewEventUpload {
   isSilent: string;
   SnoozeDisabled : string;
 }
+
+export interface ModifiedEventUpload {
+  eventName:        string;
+  eventTimeOld:     string;
+  eventTimeNewUnix: string;
+  isSilent:         string;
+  SnoozeDisabled:   string;
+}
+
 
 
 export interface RegisterFormJSON {

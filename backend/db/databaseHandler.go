@@ -32,8 +32,8 @@ func connectDB() *sql.DB {
 	return db
 }
 
-// CreateEvent Pushes an event to the database.
-func CreateEvent(ctx context.Context, newEvent dbModels.Event) string {
+// NewEventPopUp Pushes an event to the database.
+func NewEventPopUp(ctx context.Context, newEvent dbModels.Event) string {
 
 	err := newEvent.InsertG(ctx, boil.Infer())
 	if err != nil {

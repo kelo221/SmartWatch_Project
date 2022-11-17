@@ -5,7 +5,7 @@ import { fetchRequest } from "./Services/FetchRequest";
 import { Close } from "grommet-icons";
 import { eventStore } from "../Stores/eventStore";
 import { notificationStore } from "../Stores/notificationStore";
-
+import { popUpStore } from "../Stores/popUpStore";
 
 const hourRegex = /^\b2[0-3]\b|\b[0-1]?[0-9]\b$/;
 const minuteRegex = /^[0-5]?[0-9]$/;
@@ -31,30 +31,29 @@ const maskTime = [
 
 const CreateEvent = (props: Props) => {
 
-  const [eventNameLocal, setEventNameLocal] = React.useState("");
-  const [isSilentLocal, setIsSilentLocal] = React.useState(false);
-  const [snoozeDisable, setSnoozeAble] = React.useState(false);
-  const [date, setDate] = React.useState(new Date());
-  const [timeString, setTimeString] = React.useState("");
 
   const { addEvent } = eventStore();
+  const {
+    setAsNewEvent, setEventDate, setEventName, eventName, eventDate, isNewEvent, isSilent, setSilent, setTimeString,
+    timeString, setSnooze, snoozeDisabled, oldTime
+  } = popUpStore();
 
   const { setNotificationVis, setNotificationAlertLevel, setNotificationText } = notificationStore();
 
   const formatAndUpload = () => {
 
-
-    date.setHours(Number(timeString.split(":")[0]), Number(timeString.split(":")[1]), 0);
-
+    try {
+      eventDate.setHours(Number(timeString.split(":")[0]), Number(timeString.split(":")[1]), 0);
+    } catch (e) {
+      console.log(e);
+    }
 
     const newEvent: NewEventUpload = {
-      eventName: eventNameLocal,
-      eventTime: (Math.floor(date.getTime() / 1000)).toString(),
-      isSilent: isSilentLocal.toString(),
-      SnoozeDisabled: snoozeDisable.toString()
+      eventName: eventName,
+      eventTime: (Math.floor(eventDate.getTime() / 1000)).toString(),
+      isSilent: isSilent.toString(),
+      SnoozeDisabled: snoozeDisabled.toString()
     };
-
-    console.log(newEvent);
 
     fetchRequest("http://localhost:8000/api/user/event", newEvent).then((data) => {
       setNotificationVis(true);
@@ -65,10 +64,10 @@ const CreateEvent = (props: Props) => {
         addEvent({
           id: 0,
           created_at: new Date(),
-          eventtime: new Date(date.getTime()),
+          eventtime: new Date(eventDate.getTime()),
           eventid: 0,
-          eventname: eventNameLocal,
-          issilent: isSilentLocal
+          eventname: eventName,
+          issilent: isSilent
 
         });
       } else {
@@ -76,6 +75,7 @@ const CreateEvent = (props: Props) => {
         setNotificationText(data.errorText + " (" + data.status + "). Failed to create.");
       }
     });
+
   };
 
   return (
@@ -113,8 +113,8 @@ const CreateEvent = (props: Props) => {
                 { placeholder: "Enter the name of the event" }
               ]
             }
-            value={eventNameLocal}
-            onChange={event => setEventNameLocal(event.target.value)}
+            value={eventName}
+            onChange={event => setEventName(event.target.value)}
           />
         </FormField>
 
@@ -128,7 +128,9 @@ const CreateEvent = (props: Props) => {
             id="masked-date-time"
             value={timeString}
             mask={maskTime}
-            onChange={event => setTimeString(event.target.value)}
+            onChange={event => {
+              setTimeString(event.target.value);
+            }}
           />
         </FormField>
 
@@ -136,11 +138,11 @@ const CreateEvent = (props: Props) => {
           <DateInput
             height={"30px"}
             format="yyyy-mm-dd"
-            value={date.toISOString().substring(0, 10)}
+            value={new Date(eventDate).toISOString().substring(0, 10)}
             onChange={({ value }) => {
 
               if (value.length) {
-                setDate(new Date(value[0].toString()));
+                setEventDate(new Date(value[0].toString()));
               }
             }}
           />
@@ -152,21 +154,21 @@ const CreateEvent = (props: Props) => {
           name="maskedSizeUnits"
         >
           <CheckBox
-            checked={isSilentLocal}
+            checked={isSilent}
             label="Silent?"
-            onChange={(event) => setIsSilentLocal(event.target.checked)}
+            onChange={(event) => setSilent(event.target.checked)}
           />
           <CheckBox
-            checked={snoozeDisable}
+            checked={snoozeDisabled}
             label="Disable Snooze"
-            onChange={(event) => setSnoozeAble(event.target.checked)}
+            onChange={(event) => setSnooze(event.target.checked)}
           />
         </FormField>
 
 
         <Box direction="row" gap="small" pad={"small"}>
           <Button type="submit" label="Send to Smartwatch" primary onClick={() => {
-            if (eventNameLocal !== "") {
+            if (eventName !== "") {
               formatAndUpload();
             } else {
               /// TODO

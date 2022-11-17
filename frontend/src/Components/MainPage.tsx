@@ -2,10 +2,11 @@ import React, { useEffect } from "react";
 import { fetchRequest } from "./Services/FetchRequest";
 import { TimedEvent } from "../DataFormats/DataFormats";
 import { Box, Button, Card, DataTable, Notification, Text } from "grommet";
-import { Checkmark, Close, Plan, Trash, Unlink } from "grommet-icons";
-import CreateEvent from "./CreateEvent";
+import { Checkmark, Close, Trash, Unlink } from "grommet-icons";
+import NewEventPopUp from "./NewEventPopUp";
 import { eventStore } from "../Stores/eventStore";
 import { notificationStore } from "../Stores/notificationStore";
+import { popUpStore } from "../Stores/popUpStore";
 
 type Props = {
   eventVisState: React.ComponentState;
@@ -36,6 +37,7 @@ function formatDate(date: Date) {
 function MainPage(props: Props) {
 
   const { removeEvent, events, initEvents } = eventStore();
+  const { setAsNewEvent, setEventDate, setEventName, setSilent, setTimeString, setOldTime, oldTime } = popUpStore();
 
   const {
     setNotificationVis, setNotificationAlertLevel, notificationAlertLevel,
@@ -94,7 +96,8 @@ function MainPage(props: Props) {
       >
 
         {props.eventVisState ?
-          <CreateEvent eventVisState={props.eventVisState} setEventVisState={props.setEventVisState}></CreateEvent> :
+          <NewEventPopUp eventVisState={props.eventVisState}
+                         setEventVisState={props.setEventVisState}></NewEventPopUp> :
           <></>}
         Nothing here, create some events!</Card></>);
   }
@@ -146,7 +149,8 @@ function MainPage(props: Props) {
         fill
       >
         {props.eventVisState ?
-          <CreateEvent eventVisState={props.eventVisState} setEventVisState={props.setEventVisState}></CreateEvent> :
+          <NewEventPopUp eventVisState={props.eventVisState}
+                         setEventVisState={props.setEventVisState}></NewEventPopUp> :
           <></>
         }
         <DataTable
@@ -188,18 +192,6 @@ function MainPage(props: Props) {
                 } else {
                   return <Close></Close>;
                 }
-              }
-            },
-            {
-              property: "changeTime",
-              header: <Text>Modify Time?</Text>,
-              render: datum => {
-                return (
-                  <span onClick={() => deleteButtonHandler(datum.id, datum.eventtime)}
-                        id={datum.id.toString()}
-                  >
-                <Plan style={{ cursor: "pointer" }}></Plan>
-                </span>);
               }
             },
             {
