@@ -12,6 +12,7 @@ func Setup(app *fiber.App) {
 
 	api.Post("register", controllers.Register)
 	api.Post("login", controllers.Login)
+	api.Get("time", controllers.CurrentTime)
 
 	userRoute := api.Group("user")
 	protoBuff := api.Group("proto")

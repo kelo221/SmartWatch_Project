@@ -12,6 +12,12 @@ import (
 
 var UTC, _ = time.LoadLocation("UTC")
 
+func CurrentTime(c *fiber.Ctx) error {
+	timeNow := time.Now().Unix()
+	return c.SendString(strconv.FormatInt(timeNow, 10))
+
+}
+
 func GetEvents(c *fiber.Ctx) error {
 
 	user := c.Locals("user").(*jwt.Token)
