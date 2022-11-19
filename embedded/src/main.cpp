@@ -1,21 +1,9 @@
 #include <Arduino.h>
-#include <iostream>
-#include "API_Handler.hh"
-#include <WiFi.h>
-#include <HTTPClient.h>
 #include <WiFi.h>
 #include "EEPROM.h"
 #define CLK_FREQ 80000000
 #define PRESCALER 80
 #define TICKS_PER_SECOND (CLK_FREQ / PRESCALER)
-#define SSID_NAME "Simon’s iPhone"
-#define SSID_PASSWORD "wizard12"
-
-const char *wifiSSID = SSID_NAME;
-const char *wifiPassword = SSID_PASSWORD;
-
-//  eventSpace::events data = nlohmann::json::parse(testJson);
-
 /* TODO:
     De/Serialize timer UPDATE: Difficult to set up
     Integrate wifi connection UPDATE: It was easy
@@ -25,8 +13,8 @@ const char *wifiPassword = SSID_PASSWORD;
 
 // FreeRTOS parameters
 static uint8_t ucParameterToPass;
-static TaskHandle_t Task1;
-static TaskHandle_t Task2;
+TaskHandle_t Task1;
+TaskHandle_t Task2;
 
 // Time parameters
 const char *ntpServer = "pool.ntp.org";
@@ -41,11 +29,6 @@ static Data data;
 
 // Timer
 hw_timer_t *timer = NULL;
-
-#pragma region Function definitons
-void vTaskDebug(void *pvParameters);
-void vTaskMain(void *pvParameters);
-#pragma endregion
 
 #pragma region Functions
 void printLocalTime()
@@ -80,6 +63,7 @@ void deserialize(const T &t)
 
 void IRAM_ATTR onTimer()
 {
+    serialize(data);
 }
 
 #pragma endregion
@@ -89,17 +73,11 @@ void IRAM_ATTR onTimer()
 void vTaskMain(void *pvParameters)
 {
     Serial.println(xPortGetCoreID());
-    int i = 0;
+
     for (;;)
     {
         printLocalTime();
         delay(1000);
-        i++;
-        if (i == 10)
-        {
-            Serial.println("Start debug task from main task");
-            vTaskResume(Task2);
-        }
     }
 }
 
@@ -118,7 +96,7 @@ void setup()
 {
     // put your setup code here, to run once:
     Serial.begin(115200);
-#if 0
+
     // Init timer
     timer = timerBegin(0, PRESCALER, true);
     timerAttachInterrupt(timer, &onTimer, true);
@@ -128,38 +106,26 @@ void setup()
     deserialize(data);
     Serial.print("Time:" + data.time);
     setTMStructToTime(&data.time);
-#endif
+
 #if 0
   // wifi. Write own function
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(wifiSSID, wifiPassword);
-
-    for(int loopCounter = 0; WiFiClass::status() != WL_CONNECTED; ++loopCounter) {
-        Serial.println("Connecting...");
-        sleep(1);
-
-        if (loopCounter==5){
-            Serial.println("Failed to connect.");
-            exit(69);
-        }
-    }
-
-    auto http = new HTTPClient();
-    auto token = getBearerToken(*http,"test","test");
-    auto events = getEvents(*http, token);
-
-
-    for(eventSpace::event i : events) {
-        Serial.printf("%s\n", i.get_eventname().c_str());
-    }
-
-
+  WiFi.mode(WIFI_STA);
+  WiFi.begin("Simon’s iPhone", "wizard12");
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println(" CONNECTED");
   // Update time
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 #endif
-    xTaskCreatePinnedToCore(vTaskMain, "Task1", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 2, &Task1, 0);
-    xTaskCreatePinnedToCore(vTaskDebug, "Task2", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 1, &Task2, 0);
+    xTaskCreatePinnedToCore(vTaskMain, "Task1", configMINIMAL_STACK_SIZE * 3, &ucParameterToPass, tskIDLE_PRIORITY + 1, &Task1, 1);
+    xTaskCreatePinnedToCore(vTaskDebug, "Task2", configMINIMAL_STACK_SIZE * 3, &ucParameterToPass, tskIDLE_PRIORITY, &Task2, 0);
+}
+#pragma endregion
 
-    vTaskSuspend(Task2);
-    Serial.println("Suspend Debug Task");
+void loop()
+{
+    // put your main code here, to run repeatedly:
 }
