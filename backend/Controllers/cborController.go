@@ -39,8 +39,7 @@ func GetEventsCBOR(c *fiber.Ctx) error {
 		event := EventCBOR{
 			ID:             j.ID,
 			Eventname:      j.Eventname,
-			Eventtime:      j.Eventtime.Unix(),
-			CreatedAt:      j.CreatedAt.Time.Unix(),
+			Eventtime:      int64(j.Eventtime),
 			Userid:         j.Userid,
 			Issilent:       j.Issilent,
 			Snoozedisabled: j.Snoozedisabled,
@@ -128,13 +127,9 @@ func NewEventCBOR(c *fiber.Ctx) error {
 	}
 
 	eventError := databaseHandler.NewEventPopUp(c.Context(), dbModels.Event{
-		ID:        newEventCBOR.ID,
-		Eventname: newEventCBOR.Eventname,
-		Eventtime: time.Unix(newEventCBOR.Eventtime, 0),
-		CreatedAt: struct {
-			Time  time.Time
-			Valid bool
-		}{Time: time.Unix(newEventCBOR.CreatedAt, 0), Valid: true},
+		ID:             newEventCBOR.ID,
+		Eventname:      newEventCBOR.Eventname,
+		Eventtime:      int(newEventCBOR.Eventtime),
 		Userid:         newEventCBOR.Userid,
 		Issilent:       newEventCBOR.Issilent,
 		Snoozedisabled: newEventCBOR.Snoozedisabled,

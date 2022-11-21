@@ -32,8 +32,7 @@ func GetEventsProto(c *fiber.Ctx) error {
 		event := ProtoBuffers.EventsOneEvent{
 			Id:             uint32(j.ID),
 			EventName:      j.Eventname,
-			EventTimeUnix:  j.Eventtime.Unix(),
-			CreatedAtUnix:  j.CreatedAt.Time.Unix(),
+			EventTimeUnix:  int64(j.Eventtime),
 			UserId:         uint32(j.Userid),
 			IsSilent:       j.Issilent,
 			SnoozeDisabled: j.Snoozedisabled,
@@ -120,7 +119,7 @@ func NewEventProto(c *fiber.Ctx) error {
 	newEvent := dbModels.Event{
 		Userid:         int(userID),
 		Eventname:      newEventProto.EventName,
-		Eventtime:      time.Unix(newEventProto.EventTimeUnix, 0),
+		Eventtime:      int(newEventProto.EventTimeUnix),
 		Issilent:       newEventProto.IsSilent,
 		Snoozedisabled: newEventProto.SnoozeDisabled,
 	}

@@ -677,7 +677,7 @@ func testEventsSelect(t *testing.T) {
 }
 
 var (
-	eventDBTypes = map[string]string{`ID`: `integer`, `Eventname`: `character varying`, `Eventtime`: `timestamp without time zone`, `CreatedAt`: `timestamp without time zone`, `Userid`: `integer`, `Issilent`: `boolean`, `Snoozedisabled`: `boolean`}
+	eventDBTypes = map[string]string{`ID`: `integer`, `Eventname`: `character varying`, `Eventtime`: `integer`, `Userid`: `integer`, `Issilent`: `boolean`, `Snoozedisabled`: `boolean`}
 	_            = bytes.MinRead
 )
 

@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -24,13 +23,12 @@ import (
 
 // Event is an object representing the database table.
 type Event struct {
-	ID             int       `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Eventname      string    `boil:"eventname" json:"eventname" toml:"eventname" yaml:"eventname"`
-	Eventtime      time.Time `boil:"eventtime" json:"eventtime" toml:"eventtime" yaml:"eventtime"`
-	CreatedAt      null.Time `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
-	Userid         int       `boil:"userid" json:"userid" toml:"userid" yaml:"userid"`
-	Issilent       bool      `boil:"issilent" json:"issilent" toml:"issilent" yaml:"issilent"`
-	Snoozedisabled bool      `boil:"snoozedisabled" json:"snoozedisabled" toml:"snoozedisabled" yaml:"snoozedisabled"`
+	ID             int    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Eventname      string `boil:"eventname" json:"eventname" toml:"eventname" yaml:"eventname"`
+	Eventtime      int    `boil:"eventtime" json:"eventtime" toml:"eventtime" yaml:"eventtime"`
+	Userid         int    `boil:"userid" json:"userid" toml:"userid" yaml:"userid"`
+	Issilent       bool   `boil:"issilent" json:"issilent" toml:"issilent" yaml:"issilent"`
+	Snoozedisabled bool   `boil:"snoozedisabled" json:"snoozedisabled" toml:"snoozedisabled" yaml:"snoozedisabled"`
 
 	R *eventR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L eventL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -40,7 +38,6 @@ var EventColumns = struct {
 	ID             string
 	Eventname      string
 	Eventtime      string
-	CreatedAt      string
 	Userid         string
 	Issilent       string
 	Snoozedisabled string
@@ -48,7 +45,6 @@ var EventColumns = struct {
 	ID:             "id",
 	Eventname:      "eventname",
 	Eventtime:      "eventtime",
-	CreatedAt:      "created_at",
 	Userid:         "userid",
 	Issilent:       "issilent",
 	Snoozedisabled: "snoozedisabled",
@@ -58,7 +54,6 @@ var EventTableColumns = struct {
 	ID             string
 	Eventname      string
 	Eventtime      string
-	CreatedAt      string
 	Userid         string
 	Issilent       string
 	Snoozedisabled string
@@ -66,7 +61,6 @@ var EventTableColumns = struct {
 	ID:             "event.id",
 	Eventname:      "event.eventname",
 	Eventtime:      "event.eventtime",
-	CreatedAt:      "event.created_at",
 	Userid:         "event.userid",
 	Issilent:       "event.issilent",
 	Snoozedisabled: "event.snoozedisabled",
@@ -120,51 +114,6 @@ func (w whereHelperstring) NIN(slice []string) qm.QueryMod {
 	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
 
-type whereHelpertime_Time struct{ field string }
-
-func (w whereHelpertime_Time) EQ(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.EQ, x)
-}
-func (w whereHelpertime_Time) NEQ(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.NEQ, x)
-}
-func (w whereHelpertime_Time) LT(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpertime_Time) LTE(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpertime_Time) GT(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
-type whereHelpernull_Time struct{ field string }
-
-func (w whereHelpernull_Time) EQ(x null.Time) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_Time) NEQ(x null.Time) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_Time) LT(x null.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_Time) LTE(x null.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_Time) GT(x null.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_Time) GTE(x null.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
-func (w whereHelpernull_Time) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_Time) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-
 type whereHelperbool struct{ field string }
 
 func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
@@ -177,16 +126,14 @@ func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field
 var EventWhere = struct {
 	ID             whereHelperint
 	Eventname      whereHelperstring
-	Eventtime      whereHelpertime_Time
-	CreatedAt      whereHelpernull_Time
+	Eventtime      whereHelperint
 	Userid         whereHelperint
 	Issilent       whereHelperbool
 	Snoozedisabled whereHelperbool
 }{
 	ID:             whereHelperint{field: "\"event\".\"id\""},
 	Eventname:      whereHelperstring{field: "\"event\".\"eventname\""},
-	Eventtime:      whereHelpertime_Time{field: "\"event\".\"eventtime\""},
-	CreatedAt:      whereHelpernull_Time{field: "\"event\".\"created_at\""},
+	Eventtime:      whereHelperint{field: "\"event\".\"eventtime\""},
 	Userid:         whereHelperint{field: "\"event\".\"userid\""},
 	Issilent:       whereHelperbool{field: "\"event\".\"issilent\""},
 	Snoozedisabled: whereHelperbool{field: "\"event\".\"snoozedisabled\""},
@@ -220,9 +167,9 @@ func (r *eventR) GetUseridUser() *User {
 type eventL struct{}
 
 var (
-	eventAllColumns            = []string{"id", "eventname", "eventtime", "created_at", "userid", "issilent", "snoozedisabled"}
+	eventAllColumns            = []string{"id", "eventname", "eventtime", "userid", "issilent", "snoozedisabled"}
 	eventColumnsWithoutDefault = []string{"eventname", "eventtime", "userid"}
-	eventColumnsWithDefault    = []string{"id", "created_at", "issilent", "snoozedisabled"}
+	eventColumnsWithDefault    = []string{"id", "issilent", "snoozedisabled"}
 	eventPrimaryKeyColumns     = []string{"id"}
 	eventGeneratedColumns      = []string{}
 )
@@ -770,13 +717,6 @@ func (o *Event) Insert(ctx context.Context, exec boil.ContextExecutor, columns b
 	}
 
 	var err error
-	if !boil.TimestampsAreSkipped(ctx) {
-		currTime := time.Now().In(boil.GetLocation())
-
-		if queries.MustTime(o.CreatedAt).IsZero() {
-			queries.SetScanner(&o.CreatedAt, currTime)
-		}
-	}
 
 	if err := o.doBeforeInsertHooks(ctx, exec); err != nil {
 		return err
@@ -1002,13 +942,6 @@ func (o *Event) UpsertG(ctx context.Context, updateOnConflict bool, conflictColu
 func (o *Event) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
 		return errors.New("dbmodels: no event provided for upsert")
-	}
-	if !boil.TimestampsAreSkipped(ctx) {
-		currTime := time.Now().In(boil.GetLocation())
-
-		if queries.MustTime(o.CreatedAt).IsZero() {
-			queries.SetScanner(&o.CreatedAt, currTime)
-		}
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {

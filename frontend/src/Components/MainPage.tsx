@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { fetchRequest } from "./Services/FetchRequest";
 import { TimedEvent } from "../DataFormats/DataFormats";
 import { Box, Button, Card, DataTable, Notification, Text } from "grommet";
@@ -14,28 +14,12 @@ type Props = {
 };
 
 
-function padTo2Digits(num: number) {
-  return num.toString().padStart(2, "0");
-}
 
-function formatDate(date: Date) {
-  return (
-    [
-      date.getFullYear(),
-      padTo2Digits(date.getMonth() + 1),
-      padTo2Digits(date.getDate())
-    ].join("-") +
-    " " +
-    [
-      padTo2Digits(date.getHours()),
-      padTo2Digits(date.getMinutes()),
-      padTo2Digits(date.getSeconds())
-    ].join(":")
-  );
-}
+
 
 function MainPage(props: Props) {
 
+  const [queryCheck, setQueryCheck] = useState(false);
   const { removeEvent, events, initEvents } = eventStore();
   const { setAsNewEvent, setEventDate, setEventName, setSilent, setTimeString, setOldTime, oldTime } = popUpStore();
 
@@ -44,11 +28,11 @@ function MainPage(props: Props) {
     notificationText, notificationVisibility, setNotificationText
   } = notificationStore();
 
-  function deleteButtonHandler(id: number, date: Date): void {
+  function deleteButtonHandler(id: number, unixTime: number): void {
 
-    const fixedHours = new Date(date).setHours(new Date(date).getHours() - 2);
+    console.log(unixTime);
 
-    fetchRequest("http://localhost:8000/api/user/eventDate", { "eventDate": formatDate(new Date(fixedHours)).toString() }, "DELETE").then((data) => {
+    fetchRequest("http://localhost:8000/api/user/eventDate", { "eventDate": unixTime.toString() }, "DELETE").then((data) => {
 
       setNotificationVis(true);
 
@@ -66,43 +50,20 @@ function MainPage(props: Props) {
 
   useEffect(() => {
     fetchRequest("http://localhost:8000/api/user/events", {}, "GET").then((data) => {
-      if (!data.status) {
-        let jsonObject = JSON.parse(data) as TimedEvent[];
+      if (!data.status && data !== "null") {
+        let jsonObject = data as TimedEvent[];
         initEvents(jsonObject);
-      } else {
-        console.log("failed!!!", data.status);
+      } else if (data.status && data === "null") {
+        console.log("failed!!!", data.status, data);
+        setNotificationText("No events found!");
+        setNotificationVis(true);
+        setNotificationAlertLevel("critical");
+        setQueryCheck(true);
       }
     });
   }, []);
 
-  if (events === null) {
-    return (
-
-      <><Box align="center" gap="small">
-        {notificationVisibility && (
-          <Notification
-            toast={{ position: "top" }}
-            status={notificationAlertLevel}
-            message={notificationText}
-            onClose={() => setNotificationVis(true)} />
-        )}
-      </Box><Card
-        margin="small"
-        gap="medium"
-        width="medium"
-        align="center"
-        justify="center"
-        fill
-      >
-
-        {props.eventVisState ?
-          <NewEventPopUp eventVisState={props.eventVisState}
-                         setEventVisState={props.setEventVisState}></NewEventPopUp> :
-          <></>}
-        Nothing here, create some events!</Card></>);
-  }
-
-  if (!events.length) {
+  if (!queryCheck && events.length === 0) {
     return (
       <Card
         pad={"small"}
@@ -169,14 +130,14 @@ function MainPage(props: Props) {
               property: "eventtime",
               header: <Text>Event Date</Text>,
               render: datum => {
-                return <Text>{new Date(datum.eventtime).toLocaleString()}</Text>;
+                return <Text>{new Date(datum.eventtime * 1000).toLocaleString()}</Text>;
               }
             },
             {
               property: "passed",
               header: <Text>Passed?</Text>,
               render: datum => {
-                if (new Date(new Date(datum.eventtime)).valueOf() < (new Date().valueOf())) {
+                if (new Date(new Date(datum.eventtime * 1000)).valueOf() < (new Date().valueOf())) {
                   return <Checkmark></Checkmark>;
                 } else {
                   return <Close></Close>;

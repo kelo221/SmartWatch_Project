@@ -1,8 +1,7 @@
 export interface TimedEvent {
   id: number;
   eventname: string;
-  eventtime: Date;
-  created_at: Date;
+  eventtime: number;
   eventid: number;
   issilent: boolean;
 }

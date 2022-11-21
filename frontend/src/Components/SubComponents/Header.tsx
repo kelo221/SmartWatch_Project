@@ -39,6 +39,7 @@ const MainHeader = (props: Props) => {
           {localStorage.getItem("token") ? (
             <Nav direction="row">
               <Button primary label="Create A New Event" onClick={() => {
+                console.log("pressed");
                 popUpStoreObject.setAsNewEvent(true);
                 props.setState(true);
               }} />

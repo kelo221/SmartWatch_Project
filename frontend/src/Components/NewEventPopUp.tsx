@@ -63,8 +63,7 @@ const CreateEvent = (props: Props) => {
         props.setEventVisState(false);
         addEvent({
           id: 0,
-          created_at: new Date(),
-          eventtime: new Date(eventDate.getTime()),
+          eventtime: Math.floor(eventDate.getTime() / 1000),
           eventid: 0,
           eventname: eventName,
           issilent: isSilent

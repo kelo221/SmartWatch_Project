@@ -3,7 +3,6 @@ package controllers
 import (
 	databaseHandler "SmartWatch_Project/db"
 	dbModels "SmartWatch_Project/db/models"
-	"encoding/json"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"strconv"
@@ -29,13 +28,7 @@ func GetEvents(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{"error": err})
 	}
 
-	b, marshalErr := json.Marshal(eventsQ)
-
-	if marshalErr != nil {
-		return c.Status(400).JSON(fiber.Map{"error": marshalErr})
-	}
-
-	return c.JSON(string(b))
+	return c.Status(200).JSON(eventsQ)
 
 }
 
@@ -104,7 +97,7 @@ func ChangeEvent(c *fiber.Ctx) error {
 	newEvent := dbModels.Event{
 		Userid:         int(userID),
 		Eventname:      data["eventName"],
-		Eventtime:      eventTimeNewUnix,
+		Eventtime:      int(eventTimeNewUnix.Unix()),
 		Issilent:       alarmType,
 		Snoozedisabled: snoozeType,
 	}
@@ -299,7 +292,7 @@ func NewEvent(c *fiber.Ctx) error {
 	newEvent := dbModels.Event{
 		Userid:         int(userID),
 		Eventname:      data["eventName"],
-		Eventtime:      eventUnixTime,
+		Eventtime:      int(eventUnixTime.Unix()),
 		Issilent:       alarmType,
 		Snoozedisabled: snoozeType,
 	}
