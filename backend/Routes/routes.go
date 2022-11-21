@@ -16,12 +16,16 @@ func Setup(app *fiber.App) {
 
 	userRoute := api.Group("user")
 	protoBuff := api.Group("proto")
+	CBOR := api.Group("cbor")
 
 	// JWT Middleware
 	userRoute.Use(jwtware.New(jwtware.Config{
 		SigningKey: []byte("secret"),
 	}))
 	protoBuff.Use(jwtware.New(jwtware.Config{
+		SigningKey: []byte("secret"),
+	}))
+	CBOR.Use(jwtware.New(jwtware.Config{
 		SigningKey: []byte("secret"),
 	}))
 
@@ -39,4 +43,9 @@ func Setup(app *fiber.App) {
 
 	protoBuff.Get("debug", controllers.Debug)
 
+	CBOR.Get("events", controllers.GetEventsCBOR)
+	CBOR.Post("event/:bytes", controllers.NewEventCBOR)
+	CBOR.Patch("event/:bytes", controllers.ChangeEventTimeCBOR)
+	CBOR.Delete("event/:bytes", controllers.DeleteEventCBOR)
+	CBOR.Get("debug", controllers.DebugCBOR)
 }
