@@ -5,6 +5,7 @@ import (
 	databaseHandler "SmartWatch_Project/db"
 	dbModels "SmartWatch_Project/db/models"
 	"context"
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
 	"log"
@@ -69,6 +70,8 @@ func Login(c *fiber.Ctx) error {
 
 	var data map[string]string
 
+	fmt.Println(c.Request())
+	fmt.Println("-----------")
 	if err := c.BodyParser(&data); err != nil {
 		println("parsing error")
 		return err

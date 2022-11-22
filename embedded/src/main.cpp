@@ -1,49 +1,39 @@
 #include <Arduino.h>
 #include <iostream>
-#include "events.hh"
+#include "API_Handler.hh"
+#include <WiFi.h>
+#include <HTTPClient.h>
+
+
+const char* wifiSSID = "ESP_POINT";
+const char* wifiPassword = "";
+
+//  eventSpace::events data = nlohmann::json::parse(testJson);
 
 void setup() {
-
-#pragma region String
     Serial.begin(115200);
-    std::string testJson = "[\n"
-                       "    {\n"
-                       "        \"id\": 64,\n"
-                       "        \"eventname\": \"testingNow\",\n"
-                       "        \"eventtime\": \"2022-11-18T11:13:00Z\",\n"
-                       "        \"created_at\": \"2022-11-17T23:47:07.603253Z\",\n"
-                       "        \"userid\": 1,\n"
-                       "        \"issilent\": true,\n"
-                       "        \"snoozedisabled\": true\n"
-                       "    },\n"
-                       "    {\n"
-                       "        \"id\": 47,\n"
-                       "        \"eventname\": \"newUnixMod\",\n"
-                       "        \"eventtime\": \"2001-04-13T00:00:00Z\",\n"
-                       "        \"created_at\": \"2022-11-17T19:01:33.524045Z\",\n"
-                       "        \"userid\": 1,\n"
-                       "        \"issilent\": true,\n"
-                       "        \"snoozedisabled\": false\n"
-                       "    },\n"
-                       "    {\n"
-                       "        \"id\": 49,\n"
-                       "        \"eventname\": \"12121212\",\n"
-                       "        \"eventtime\": \"2022-11-17T21:15:02Z\",\n"
-                       "        \"created_at\": \"2022-11-17T21:15:08.987922Z\",\n"
-                       "        \"userid\": 1,\n"
-                       "        \"issilent\": true,\n"
-                       "        \"snoozedisabled\": true\n"
-                       "    }\n"
-                       "]";
-#pragma endregion
-    eventSpace::events data = nlohmann::json::parse(testJson);
+    WiFi.begin(wifiSSID, wifiPassword);
 
-    const std::string test = "testing";
+    for(int loopCounter = 0; WiFiClass::status() != WL_CONNECTED; ++loopCounter) {
+        Serial.println("Connecting...");
+        sleep(1);
 
-    for(eventSpace::event i : data) {
+        if (loopCounter==5){
+            Serial.println("Failed to connect.");
+            exit(69);
+        }
+    }
+
+    auto http = new HTTPClient();
+    auto token = getBearerToken(*http,"test","test");
+    auto events = getEvents(*http, token);
+
+    for(eventSpace::event i : events) {
         Serial.printf("%s\n", i.get_eventname().c_str());
     }
-    
+
 }
 
-void loop() {}
+void loop() {
+    sleep(1);
+}
