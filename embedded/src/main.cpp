@@ -25,8 +25,8 @@ const char *wifiPassword = SSID_PASSWORD;
 
 // FreeRTOS parameters
 static uint8_t ucParameterToPass;
-TaskHandle_t Task1;
-TaskHandle_t Task2;
+static TaskHandle_t Task1;
+static TaskHandle_t Task2;
 
 // Time parameters
 const char *ntpServer = "pool.ntp.org";
@@ -41,6 +41,11 @@ static Data data;
 
 // Timer
 hw_timer_t *timer = NULL;
+
+#pragma region Function definitons
+void vTaskDebug(void *pvParameters);
+void vTaskMain(void *pvParameters);
+#pragma endregion
 
 #pragma region Functions
 void printLocalTime()
@@ -75,7 +80,6 @@ void deserialize(const T &t)
 
 void IRAM_ATTR onTimer()
 {
-    serialize(data);
 }
 
 #pragma endregion
@@ -85,11 +89,17 @@ void IRAM_ATTR onTimer()
 void vTaskMain(void *pvParameters)
 {
     Serial.println(xPortGetCoreID());
-
+    int i = 0;
     for (;;)
     {
         printLocalTime();
         delay(1000);
+        i++;
+        if (i == 10)
+        {
+            Serial.println("Start debug task from main task");
+            vTaskResume(Task2);
+        }
     }
 }
 
@@ -108,7 +118,7 @@ void setup()
 {
     // put your setup code here, to run once:
     Serial.begin(115200);
-
+#if 0
     // Init timer
     timer = timerBegin(0, PRESCALER, true);
     timerAttachInterrupt(timer, &onTimer, true);
@@ -118,7 +128,7 @@ void setup()
     deserialize(data);
     Serial.print("Time:" + data.time);
     setTMStructToTime(&data.time);
-
+#endif
 #if 0
   // wifi. Write own function
     WiFi.mode(WIFI_STA);
@@ -147,6 +157,9 @@ void setup()
   // Update time
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 #endif
-    xTaskCreatePinnedToCore(vTaskMain, "Task1", configMINIMAL_STACK_SIZE * 3, &ucParameterToPass, tskIDLE_PRIORITY + 1, &Task1, 1);
-    xTaskCreatePinnedToCore(vTaskDebug, "Task2", configMINIMAL_STACK_SIZE * 3, &ucParameterToPass, tskIDLE_PRIORITY, &Task2, 0);
+    xTaskCreatePinnedToCore(vTaskMain, "Task1", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 2, &Task1, 0);
+    xTaskCreatePinnedToCore(vTaskDebug, "Task2", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 1, &Task2, 0);
+
+    vTaskSuspend(Task2);
+    Serial.println("Suspend Debug Task");
 }
