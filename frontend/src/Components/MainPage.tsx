@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { fetchRequest } from "./Services/FetchRequest";
 import { TimedEvent } from "../DataFormats/DataFormats";
 import { Box, Button, Card, DataTable, Notification, Text } from "grommet";
-import { Checkmark, Close, Trash, Unlink } from "grommet-icons";
+import { Checkmark, Close, LinkUp, Trash, Unlink } from "grommet-icons";
 import NewEventPopUp from "./NewEventPopUp";
 import { eventStore } from "../Stores/eventStore";
 import { notificationStore } from "../Stores/notificationStore";
@@ -85,6 +85,25 @@ function MainPage(props: Props) {
           }} /></>
         ) : <></>
         }
+      </Card>
+    );
+  }
+
+
+  if (events.length === 0) {
+    return (
+      <Card
+        pad={"small"}
+        margin="small"
+        gap="medium"
+        width="medium"
+        align="center"
+        justify="center"
+        alignContent="row"
+        fill
+      >
+        <LinkUp></LinkUp>
+        <Text>Create some events!</Text>
       </Card>
     );
   }
