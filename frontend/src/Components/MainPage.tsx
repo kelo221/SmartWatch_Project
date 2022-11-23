@@ -50,7 +50,7 @@ function MainPage(props: Props) {
 
   useEffect(() => {
     fetchRequest("http://localhost:8000/api/user/events", {}, "GET").then((data) => {
-      if (!data.status && data !== "null") {
+      if (!data.status && data !== "null" && data !== null) {
         let jsonObject = data as TimedEvent[];
         initEvents(jsonObject);
       } else if (data.status && data === "null") {
