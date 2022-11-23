@@ -50,10 +50,11 @@ function MainPage(props: Props) {
 
   useEffect(() => {
     fetchRequest("http://localhost:8000/api/user/events", {}, "GET").then((data) => {
-      if (!data.status && data !== "null" && data !== null) {
+      if (data !== "null" && data !== null && !data.status) {
+        console.log(data);
         let jsonObject = data as TimedEvent[];
         initEvents(jsonObject);
-      } else if (data.status && data === "null") {
+      } else if (data === "null" && data.status) {
         console.log("failed!!!", data.status, data);
         setNotificationText("No events found!");
         setNotificationVis(true);
@@ -63,7 +64,7 @@ function MainPage(props: Props) {
     });
   }, []);
 
-  if (!queryCheck && events.length === 0) {
+  if (queryCheck && events.length === 0) {
     return (
       <Card
         pad={"small"}
