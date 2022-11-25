@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include "EEPROM.h"
+#include <vector>
 #define CLK_FREQ 80000000
 #define PRESCALER 80
 #define TICKS_PER_SECOND (CLK_FREQ / PRESCALER)
@@ -15,7 +16,8 @@
 static uint8_t ucParameterToPass;
 static TaskHandle_t Task1;
 static TaskHandle_t Task2;
-
+static TaskHandle_t TaskAlarm;
+static SemaphoreHandle_t alarmSemaphore;
 // Time parameters
 const char *ntpServer = "pool.ntp.org";
 const long gmtOffset_sec = 7200;
@@ -26,6 +28,8 @@ typedef struct Data
     time_t time;
 } Data;
 static Data data;
+
+static std::vector<time_t> alarms;
 
 // Timer
 hw_timer_t *timer = NULL;
@@ -70,6 +74,21 @@ void IRAM_ATTR onTimer()
 {
 }
 
+bool checkAlarms(const time_t currentTime)
+{
+    auto it = alarms.begin();
+    while (it != alarms.end())
+    {
+        if (*it > currentTime - 2 && *it < currentTime + 2)
+        {
+            it = alarms.erase(it);
+            return true;
+        }
+        ++it;
+    }
+    return false;
+}
+
 #pragma endregion
 
 #pragma region Tasks
@@ -77,18 +96,43 @@ void IRAM_ATTR onTimer()
 void vTaskMain(void *pvParameters)
 {
     Serial.println(xPortGetCoreID());
+    bool alarmRunning = false;
     int i = 0;
     for (;;)
     {
         printLocalTime();
-        delay(1000);
+
+        if (checkAlarms(data.time))
+        {
+            if (xSemaphoreTake(alarmSemaphore, portMAX_DELAY) == pdTRUE)
+            {
+                vTaskResume(TaskAlarm);
+            }
+        }
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+}
+// handles the alarm
+void vTaskAlarm(void *pvParameters)
+{
+    // start beeping
+    bool exit = false;
+    int i = 0;
+    while (!exit)
+    {
+        // beep for x miliseconds
+        // stop beeping
+        // check input
+        // exit
+        Serial.println("Beep");
         i++;
         if (i == 10)
         {
-            Serial.println("Start debug task from main task");
-            vTaskResume(Task2);
+            return;
         }
     }
+    xSemaphoreGive(alarmSemaphore);
+    vTaskSuspend(NULL); // suspend oneself
 }
 
 void vTaskDebug(void *pvParameters)
@@ -117,6 +161,7 @@ void setup()
     Serial.print("Time:" + data.time);
     setTMStructToTime(&data.time);
 #endif
+<<<<<<< HEAD
 #if 0
   // wifi. Write own function
   WiFi.mode(WIFI_STA);
@@ -129,16 +174,63 @@ void setup()
   Serial.println(" CONNECTED");
   // Update time
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+=======
+#if 1
+    // wifi. Write own function
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(wifiSSID, wifiPassword);
+
+    for (int loopCounter = 0; WiFiClass::status() != WL_CONNECTED; ++loopCounter)
+    {
+        Serial.println("Connecting...");
+        sleep(1);
+
+        if (loopCounter == 5)
+        {
+            Serial.println("Failed to connect.");
+            exit(69);
+        }
+    }
+
+    // configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+
+    // Poll events from the server
+    auto http = new HTTPClient();
+    auto token = getBearerToken(*http, "test", "test");
+    auto events = getEvents(*http, token);
+
+    // for (eventSpace::event i : events)
+    // {
+    //     Serial.printf("%s\n", i.get_eventname().c_str());
+    //     // alarms.push_back((time_t)i.get_eventtime());
+    // }
+
+    // Update time
+
+>>>>>>> 501ff3e (Alarm functionality)
 #endif
-    xTaskCreatePinnedToCore(vTaskMain, "Task1", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 2, &Task1, 0);
+    xTaskCreatePinnedToCore(vTaskMain, "Task1", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 2, &Task1, 1);
     xTaskCreatePinnedToCore(vTaskDebug, "Task2", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 1, &Task2, 0);
+    xTaskCreatePinnedToCore(vTaskAlarm, "TaskAlarm", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 1, &TaskAlarm, 0);
 
     vTaskSuspend(Task2);
+    vTaskSuspend(TaskAlarm);
+
+    Serial.println("Tasks set!");
+
+    alarmSemaphore = xSemaphoreCreateBinary();
+
     Serial.println("Suspend Debug Task");
 }
+<<<<<<< HEAD
 #pragma endregion
 
 void loop()
 {
     // put your main code here, to run repeatedly:
+=======
+
+void loop()
+{
+>>>>>>> 501ff3e (Alarm functionality)
 }
