@@ -6,6 +6,7 @@
 #include <WiFi.h>
 #include "EEPROM.h"
 #include <vector>
+#include <LiquidCrystal.h>
 #define CLK_FREQ 80000000
 #define PRESCALER 80
 #define TICKS_PER_SECOND (CLK_FREQ / PRESCALER)
@@ -24,6 +25,8 @@ const char *wifiPassword = SSID_PASSWORD;
     Set up proper project i.e, clone
 */
 
+// LCD
+static LiquidCrystal *lcd;
 // FreeRTOS parameters
 static uint8_t ucParameterToPass;
 static TaskHandle_t Task1;
@@ -61,9 +64,10 @@ void printLocalTime()
     // time_t now;
     time(&data.time);
     localtime_r(&data.time, &timeinfo);
-    strftime(strtime_buf, sizeof(strtime_buf), "%c", &timeinfo);
+    strftime(strtime_buf, sizeof(strtime_buf), "%a %H:%M:%S", &timeinfo);
 
-    Serial.println(strtime_buf);
+    lcd->setCursor(0, 0);
+    lcd->print(strtime_buf);
 }
 
 void setTMStructToTime(const time_t *time)
@@ -162,7 +166,11 @@ void setup()
 {
     // put your setup code here, to run once:
     Serial.begin(115200);
-#if 0
+    lcd = new LiquidCrystal(15, 16, 17, 18, 8, 3);
+    lcd->begin(16, 2);
+    lcd->setCursor(1, 0); // Left: horizontal, right: vertical (16x2)
+    lcd->print("hi");
+#if 1
     // Init timer
     timer = timerBegin(0, PRESCALER, true);
     timerAttachInterrupt(timer, &onTimer, true);
@@ -172,8 +180,6 @@ void setup()
     deserialize(data);
     Serial.print("Time:" + data.time);
     setTMStructToTime(&data.time);
-#endif
-#if 1
     // wifi. Write own function
     WiFi.mode(WIFI_STA);
     WiFi.begin(wifiSSID, wifiPassword);
@@ -181,6 +187,9 @@ void setup()
     for (int loopCounter = 0; WiFiClass::status() != WL_CONNECTED; ++loopCounter)
     {
         Serial.println("Connecting...");
+        lcd->setCursor(0, 1);
+        lcd->print("Connecting...");
+
         sleep(1);
 
         if (loopCounter == 5)
@@ -189,21 +198,21 @@ void setup()
             exit(69);
         }
     }
-
-    // configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-
+    lcd->print("");
+    lcd->setCursor(0, 0);
+    configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+#endif
+#if 0
     // Poll events from the server
     auto http = new HTTPClient();
     auto token = getBearerToken(*http, "test", "test");
     auto events = getEvents(*http, token);
 
-    // for (eventSpace::event i : events)
-    // {
-    //     Serial.printf("%s\n", i.get_eventname().c_str());
-    //     // alarms.push_back((time_t)i.get_eventtime());
-    // }
-
-    // Update time
+    for (eventSpace::event i : events)
+    {
+        Serial.printf("%s\n", i.get_eventname().c_str());
+        // alarms.push_back((time_t)i.get_eventtime());
+    }
 
 #endif
     xTaskCreatePinnedToCore(vTaskMain, "Task1", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 2, &Task1, 1);
