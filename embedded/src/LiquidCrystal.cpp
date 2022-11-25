@@ -82,7 +82,7 @@ void LiquidCrystal::begin(uint8_t cols, uint8_t lines, uint8_t dotsize)
     _displayfunction |= LCD_2LINE;
   }
   _numlines = lines;
-
+  _numcols = cols;
   setRowOffsets(0x00, 0x40, 0x00 + cols, 0x40 + cols);
 
   // for some 1 line displays you can select a 10 pixel high font
@@ -185,7 +185,14 @@ void LiquidCrystal::clear()
   command(LCD_CLEARDISPLAY); // clear display, set cursor position to zero
   delayMicroseconds(2000);   // this command takes a long time!
 }
-
+void LiquidCrystal::clearLine(uint8_t line)
+{
+  setCursor(0, line);
+  for (int i = 0; i < _numcols; i++)
+  {
+    LiquidCrystal::write(" ");
+  }
+}
 void LiquidCrystal::home()
 {
   command(LCD_RETURNHOME); // set cursor position to zero

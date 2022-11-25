@@ -32,7 +32,9 @@ static uint8_t ucParameterToPass;
 static TaskHandle_t Task1;
 static TaskHandle_t Task2;
 static TaskHandle_t TaskAlarm;
+static TaskHandle_t TaskMetronome;
 static SemaphoreHandle_t alarmSemaphore;
+static SemaphoreHandle_t lcdSemaphore;
 // Time parameters
 const char *ntpServer = "pool.ntp.org";
 const long gmtOffset_sec = 7200;
@@ -52,6 +54,8 @@ hw_timer_t *timer = NULL;
 #pragma region Function definitons
 void vTaskDebug(void *pvParameters);
 void vTaskMain(void *pvParameters);
+void vTaskMetronome(void *pvParameters);
+void printToLCDWithMutex(const char *str, uint8_t col, uint8_t line);
 #pragma endregion
 
 #pragma region Functions
@@ -64,10 +68,9 @@ void printLocalTime()
     // time_t now;
     time(&data.time);
     localtime_r(&data.time, &timeinfo);
-    strftime(strtime_buf, sizeof(strtime_buf), "%a %H:%M:%S", &timeinfo);
+    strftime(strtime_buf, sizeof(strtime_buf), "  %a %H:%M:%S \n", &timeinfo);
 
-    lcd->setCursor(0, 0);
-    lcd->print(strtime_buf);
+    printToLCDWithMutex(strtime_buf, 0, 0);
 }
 
 void setTMStructToTime(const time_t *time)
@@ -103,6 +106,16 @@ bool checkAlarms(const time_t currentTime)
         ++it;
     }
     return false;
+}
+
+void printToLCDWithMutex(const char *str, uint8_t col, uint8_t line)
+{
+    if (xSemaphoreTake(lcdSemaphore, portMAX_DELAY) == pdTRUE)
+    {
+        lcd->setCursor(col, line);
+        lcd->print(str);
+        xSemaphoreGive(lcdSemaphore);
+    }
 }
 
 #pragma endregion
@@ -160,16 +173,42 @@ void vTaskDebug(void *pvParameters)
         delay(1000);
     }
 }
+
+void vTaskMetronome(void *pvParameters)
+{
+    int bpm = 60;
+
+    for (;;)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            vTaskDelay(((6000 / bpm) / 4) / portTICK_PERIOD_MS);
+            
+            if (xSemaphoreTake(lcdSemaphore, portMAX_DELAY) == pdTRUE)
+            {
+                lcd->clearLine(1);
+                xSemaphoreGive(lcdSemaphore);
+            }
+            printToLCDWithMutex("----", i, 1);
+            if (i == 3)
+            {
+                Serial.println("Metronome");
+            }
+        }
+    }
+}
 #pragma endregion
 
 void setup()
 {
     // put your setup code here, to run once:
     Serial.begin(115200);
+    alarmSemaphore = xSemaphoreCreateBinary();
+    lcdSemaphore = xSemaphoreCreateMutex();
     lcd = new LiquidCrystal(15, 16, 17, 18, 8, 3);
     lcd->begin(16, 2);
-    lcd->setCursor(1, 0); // Left: horizontal, right: vertical (16x2)
-    lcd->print("hi");
+    lcd->setCursor(0, 0); // Left: horizontal, right: vertical (16x2)
+    printToLCDWithMutex("hi", 0, 0);
 #if 1
     // Init timer
     timer = timerBegin(0, PRESCALER, true);
@@ -187,8 +226,7 @@ void setup()
     for (int loopCounter = 0; WiFiClass::status() != WL_CONNECTED; ++loopCounter)
     {
         Serial.println("Connecting...");
-        lcd->setCursor(0, 1);
-        lcd->print("Connecting...");
+        printToLCDWithMutex("Connecting...", 0, 1);
 
         sleep(1);
 
@@ -198,7 +236,7 @@ void setup()
             exit(69);
         }
     }
-    lcd->print("");
+    lcd->clearLine(1);
     lcd->setCursor(0, 0);
     configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 #endif
@@ -215,16 +253,17 @@ void setup()
     }
 
 #endif
+
+    lcd->clear();
     xTaskCreatePinnedToCore(vTaskMain, "Task1", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 2, &Task1, 1);
     xTaskCreatePinnedToCore(vTaskDebug, "Task2", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 1, &Task2, 0);
     xTaskCreatePinnedToCore(vTaskAlarm, "TaskAlarm", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 1, &TaskAlarm, 0);
+    xTaskCreatePinnedToCore(vTaskMetronome, "TaskMetronome", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 1, &TaskMetronome, 0);
 
     vTaskSuspend(Task2);
     vTaskSuspend(TaskAlarm);
 
     Serial.println("Tasks set!");
-
-    alarmSemaphore = xSemaphoreCreateBinary();
 
     Serial.println("Suspend Debug Task");
 }

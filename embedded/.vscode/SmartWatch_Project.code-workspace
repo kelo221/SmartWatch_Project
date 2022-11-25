@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"name": "embedded",
+			"path": ".."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"cstring": "cpp"
+		}
+	}
+}
