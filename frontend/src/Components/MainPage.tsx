@@ -102,6 +102,11 @@ function MainPage(props: Props) {
         alignContent="row"
         fill
       >
+        {props.eventVisState ?
+          <NewEventPopUp eventVisState={props.eventVisState}
+                         setEventVisState={props.setEventVisState}></NewEventPopUp> :
+          <></>
+        }
         <LinkUp></LinkUp>
         <Text>Create some events!</Text>
       </Card>

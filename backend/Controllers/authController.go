@@ -5,13 +5,9 @@ import (
 	databaseHandler "SmartWatch_Project/db"
 	dbModels "SmartWatch_Project/db/models"
 	"context"
-	"fmt"
-	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"time"
-
-	"github.com/golang-jwt/jwt/v4"
 )
 
 func hashAndSalt(pwd string) string {
@@ -70,8 +66,6 @@ func Login(c *fiber.Ctx) error {
 
 	var data map[string]string
 
-	fmt.Println(c.Request())
-	fmt.Println("-----------")
 	if err := c.BodyParser(&data); err != nil {
 		println("parsing error")
 		return err
