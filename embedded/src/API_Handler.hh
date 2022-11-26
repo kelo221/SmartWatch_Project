@@ -1,5 +1,3 @@
-#ifndef UNTITLED3_API_HANDLER_HH
-#define UNTITLED3_API_HANDLER_HH
 #pragma once
 #include <HTTPClient.h>
 #include "events.hh"
@@ -75,27 +73,25 @@ bool deleteEvent(HTTPClient &http,const std::string& bearerToken,const int unixT
 
     std::string serializedPayload = deletePayload.dump();
 
+    bool httpSuccess;
 
     int httpResponseCode = http.sendRequest("DELETE", serializedPayload.c_str());
 
-    if (httpResponseCode>0) {
+    if (httpResponseCode==200) {
         Serial.print("HTTP Response code: ");
         Serial.println(httpResponseCode);
         rawJSON = http.getString();
         Serial.println(rawJSON);
         http.end();
-        return true;
+        httpSuccess = true;
     }
     else {
         Serial.print("Error code: ");
         Serial.println(httpResponseCode);
         http.end();
-        return false;
+        httpSuccess = false;
     }
 
+    return httpSuccess;
 
 }
-
-
-
-#endif //UNTITLED3_API_HANDLER_HH

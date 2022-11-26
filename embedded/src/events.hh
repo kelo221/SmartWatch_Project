@@ -1,18 +1,6 @@
 #include <nlohmann/json.hpp>
 
 #pragma once
-#ifndef UNTITLED3_EVENTS_HH
-#define UNTITLED3_EVENTS_HH
-
-//  To parse this JSON data, first install
-//
-//      json.hpp  https://github.com/nlohmann/json
-//
-//  Then include this file, and then do
-//
-//     events data = nlohmann::json::parse(jsonString);
-
-#pragma once
 
 #include <optional>
 #include <stdexcept>
@@ -25,7 +13,7 @@ namespace eventSpace {
         if (j.find(property) != j.end()) {
             return j.at(property).get<json>();
         }
-        return json();
+        return {};
     }
 
     inline json get_untyped(const json & j, const std::string& property) {
@@ -102,6 +90,3 @@ namespace nlohmann {
     }
 }
 
-
-
-#endif //UNTITLED3_EVENTS_HH

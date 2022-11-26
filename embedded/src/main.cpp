@@ -1,11 +1,15 @@
 #include <Arduino.h>
 #include <iostream>
 #include "API_Handler.hh"
+#include "beeper.hh"
 #include <WiFi.h>
 #include <HTTPClient.h>
 
+
+///TODO CLEAR PASSWORD BEFORE PUSHING
 const char* wifiSSID = "ESP_POINT";
-const char* wifiPassword = "$GZpLt^%s5DLYK25";
+const char* wifiPassword = "";
+///TODO CLEAR PASSWORD BEFORE PUSHING
 
 void setup() {
     Serial.begin(115200);
@@ -25,11 +29,13 @@ void setup() {
     auto token = getBearerToken(*http,"test","test");
     auto events = getEvents(*http, token);
 
-    Serial.println(deleteEvent(*http,token,1669458780)? "OK!" : "FAILED TO DELETE");
+    Serial.println(deleteEvent(*http,token,1669458780) ? "OK!!" : "FAILED!!");
 
-/*    for(eventSpace::event i : events) {
+    beep();
+
+    for(const eventSpace::event& i : events) {
         Serial.printf("%s\n", i.get_eventname().c_str());
-    }*/
+    }
 
 }
 
