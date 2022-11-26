@@ -254,26 +254,19 @@ void setup()
 
     for (int loopCounter = 0; WiFiClass::status() != WL_CONNECTED; ++loopCounter)
     {
-        for (int loopCounter = 0; WiFiClass::status() != WL_CONNECTED; ++loopCounter)
+        Serial.println("Connecting...");
+        printToLCDWithMutex("Connecting...", 0, 1);
+
+        sleep(1);
+        if (loopCounter == 5)
         {
-            Serial.println("Connecting...");
-            printToLCDWithMutex("Connecting...", 0, 1);
-
-            printToLCDWithMutex("Connecting...", 0, 1);
-
-            sleep(1);
-
-            if (loopCounter == 5)
-            {
-                if (loopCounter == 5)
-                {
-                    Serial.println("Failed to connect.");
-                    exit(69);
-                }
-            }
-            lcd->clearLine(1);
-            lcd->setCursor(0, 0);
-            configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+            Serial.println("Failed to connect.");
+            exit(69);
+        }
+    }
+    lcd->clearLine(1);
+    lcd->setCursor(0, 0);
+    configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 #endif
 #if 0
     // Poll events from the server
@@ -299,36 +292,34 @@ void setup()
 
 #endif
 
-            lcd->clear();
-            xTaskCreatePinnedToCore(vTaskMain, "Task1", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 2, &Task1, 1);
-            xTaskCreatePinnedToCore(vTaskDebug, "Task2", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 1, &Task2, 0);
-            xTaskCreatePinnedToCore(vTaskAlarm, "TaskAlarm", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 1, &TaskAlarm, 0);
-            xTaskCreatePinnedToCore(vTaskMetronome, "TaskMetronome", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 1, &TaskMetronome, 0);
+    lcd->clear();
+    xTaskCreatePinnedToCore(vTaskMain, "Task1", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 2, &Task1, 1);
+    xTaskCreatePinnedToCore(vTaskDebug, "Task2", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 1, &Task2, 0);
+    xTaskCreatePinnedToCore(vTaskAlarm, "TaskAlarm", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 1, &TaskAlarm, 0);
+    xTaskCreatePinnedToCore(vTaskMetronome, "TaskMetronome", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 1, &TaskMetronome, 0);
 
-            vTaskSuspend(Task2);
-            vTaskSuspend(TaskAlarm);
+    vTaskSuspend(Task2);
+    vTaskSuspend(TaskAlarm);
 
-            Serial.println("Tasks set!");
+    Serial.println("Tasks set!");
 
-            Serial.println("Suspend Debug Task");
+    Serial.println("Suspend Debug Task");
 #endif
 
-            lcd->clear();
-            xTaskCreatePinnedToCore(vTaskMain, "Task1", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 2, &Task1, 1);
-            xTaskCreatePinnedToCore(vTaskDebug, "Task2", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 1, &Task2, 0);
-            xTaskCreatePinnedToCore(vTaskAlarm, "TaskAlarm", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 1, &TaskAlarm, 0);
-            xTaskCreatePinnedToCore(vTaskMetronome, "TaskMetronome", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 1, &TaskMetronome, 0);
+    lcd->clear();
+    xTaskCreatePinnedToCore(vTaskMain, "Task1", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 2, &Task1, 1);
+    xTaskCreatePinnedToCore(vTaskDebug, "Task2", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 1, &Task2, 0);
+    xTaskCreatePinnedToCore(vTaskAlarm, "TaskAlarm", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 1, &TaskAlarm, 0);
+    xTaskCreatePinnedToCore(vTaskMetronome, "TaskMetronome", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 1, &TaskMetronome, 0);
 
-            vTaskSuspend(Task2);
-            vTaskSuspend(TaskAlarm);
+    vTaskSuspend(Task2);
+    vTaskSuspend(TaskAlarm);
 
-            Serial.println("Tasks set!");
+    Serial.println("Tasks set!");
 
-            Serial.println("Suspend Debug Task");
-        }
+    Serial.println("Suspend Debug Task");
+}
 
-        void loop()
-        {
-            void loop()
-            {
-            }
+void loop()
+{
+}
