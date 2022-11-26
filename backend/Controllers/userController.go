@@ -3,6 +3,7 @@ package controllers
 import (
 	databaseHandler "SmartWatch_Project/db"
 	dbModels "SmartWatch_Project/db/models"
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"strconv"
@@ -167,6 +168,9 @@ func DeleteEventDate(c *fiber.Ctx) error {
 	user := c.Locals("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
 	idString := claims["ID"].(float64)
+
+	fmt.Println(c.Request())
+	fmt.Println("-----------")
 
 	var data map[string]string
 
