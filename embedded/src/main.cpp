@@ -1,4 +1,8 @@
 #include <Arduino.h>
+#include <iostream>
+#include "API_Handler.hh"
+#include <WiFi.h>
+#include <HTTPClient.h>
 #include <WiFi.h>
 #include "EEPROM.h"
 #include <vector>
@@ -6,6 +10,14 @@
 #define CLK_FREQ 80000000
 #define PRESCALER 80
 #define TICKS_PER_SECOND (CLK_FREQ / PRESCALER)
+#define SSID_NAME "Simon’s iPhone"
+#define SSID_PASSWORD "wizard12"
+
+const char *wifiSSID = SSID_NAME;
+const char *wifiPassword = SSID_PASSWORD;
+
+//  eventSpace::events data = nlohmann::json::parse(testJson);
+
 /* TODO:
     De/Serialize timer UPDATE: Difficult to set up
     Integrate wifi connection UPDATE: It was easy
@@ -171,7 +183,7 @@ void vTaskMetronome(void *pvParameters)
         for (int i = 0; i < 4; i++)
         {
             vTaskDelay(((6000 / bpm) / 4) / portTICK_PERIOD_MS);
-            
+
             if (xSemaphoreTake(lcdSemaphore, portMAX_DELAY) == pdTRUE)
             {
                 lcd->clearLine(1);
@@ -255,15 +267,7 @@ void setup()
 
     Serial.println("Suspend Debug Task");
 }
-<<<<<<< HEAD
-#pragma endregion
 
 void loop()
 {
-    // put your main code here, to run repeatedly:
-    == == == =
-
-                 void loop()
-    {
->>>>>>> 501ff3e (Alarm functionality)
-    }
+}
