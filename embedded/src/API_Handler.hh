@@ -1,11 +1,13 @@
-#ifndef UNTITLED3_API_HANDLER_HH
-#define UNTITLED3_API_HANDLER_HH
 #pragma once
 #include <HTTPClient.h>
 #include "events.hh"
 
-const char* POST_LoginPath = "http://192.168.1.185:8000/api/login";
-const char* GET_EventsPath = "http://192.168.1.185:8000/api/user/events";
+const String HOST_ADDRESS   =   "192.168.1.185";
+const String PORT           =   ":8000";
+
+const String POST_LOGIN     =   "http://" + HOST_ADDRESS + PORT + "/api/login";
+const String GET_EVENTS     =   "http://" + HOST_ADDRESS + PORT + "/api/user/events";
+const String DELETE_EVENT   =   "http://" + HOST_ADDRESS + PORT + "/api/user/eventDate";
 
 std::string getBearerToken(HTTPClient &http, const std::string& username, const std::string& password){
 
@@ -15,8 +17,7 @@ std::string getBearerToken(HTTPClient &http, const std::string& username, const 
     String tokenJSON;
 
     std::string serializedPayload = loginPayLoad.dump();
-    Serial.println(serializedPayload.c_str());
-    http.begin(POST_LoginPath);
+    http.begin(POST_LOGIN);
     http.addHeader("Content-Type", "application/json");
     int httpResponseCode = http.POST((serializedPayload +"\n").c_str());
 
@@ -39,7 +40,7 @@ std::string getBearerToken(HTTPClient &http, const std::string& username, const 
 
 eventSpace::events getEvents(HTTPClient &http,const std::string& bearerToken){
 
-    http.begin(GET_EventsPath);
+    http.begin(GET_EVENTS);
     http.addHeader("Authorization",("Bearer "+ bearerToken).c_str());
     String rawJSON;
 
@@ -60,5 +61,37 @@ eventSpace::events getEvents(HTTPClient &http,const std::string& bearerToken){
     return nlohmann::json::parse(rawJSON);
 }
 
+bool deleteEvent(HTTPClient &http,const std::string& bearerToken,const int unixTime){
 
-#endif //UNTITLED3_API_HANDLER_HH
+    http.begin(DELETE_EVENT);
+    http.addHeader("Content-Type", "application/json");
+    http.addHeader("Authorization",("Bearer "+ bearerToken).c_str());
+    String rawJSON;
+
+    nlohmann::json deletePayload;
+    deletePayload["eventDate"] = std::to_string(unixTime);
+
+    std::string serializedPayload = deletePayload.dump();
+
+    bool httpSuccess;
+
+    int httpResponseCode = http.sendRequest("DELETE", serializedPayload.c_str());
+
+    if (httpResponseCode==200) {
+        Serial.print("HTTP Response code: ");
+        Serial.println(httpResponseCode);
+        rawJSON = http.getString();
+        Serial.println(rawJSON);
+        http.end();
+        httpSuccess = true;
+    }
+    else {
+        Serial.print("Error code: ");
+        Serial.println(httpResponseCode);
+        http.end();
+        httpSuccess = false;
+    }
+
+    return httpSuccess;
+
+}

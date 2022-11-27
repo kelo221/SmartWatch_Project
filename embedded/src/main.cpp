@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <iostream>
 #include "API_Handler.hh"
+#include "beeper.hh"
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <WiFi.h>
