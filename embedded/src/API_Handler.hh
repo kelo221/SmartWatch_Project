@@ -2,30 +2,30 @@
 #include <HTTPClient.h>
 #include "events.hh"
 
-const String HOST_ADDRESS   =   "192.168.1.185";
-const String PORT           =   ":8000";
+const std::string HOST_ADDRESS   =   "192.168.1.185";
+const std::string PORT           =   ":8000";
 
-const String POST_LOGIN     =   "http://" + HOST_ADDRESS + PORT + "/api/login";
-const String GET_EVENTS     =   "http://" + HOST_ADDRESS + PORT + "/api/user/events";
-const String DELETE_EVENT   =   "http://" + HOST_ADDRESS + PORT + "/api/user/eventDate";
+const std::string POST_LOGIN     =   "http://" + HOST_ADDRESS + PORT + "/api/login";
+const std::string GET_EVENTS     =   "http://" + HOST_ADDRESS + PORT + "/api/user/events";
+const std::string DELETE_EVENT   =   "http://" + HOST_ADDRESS + PORT + "/api/user/eventDate";
 
 std::string getBearerToken(HTTPClient &http, const std::string& username, const std::string& password){
 
     nlohmann::json loginPayLoad;
     loginPayLoad["username"] = username;
     loginPayLoad["password"] = password;
-    String tokenJSON;
+    std::string tokenJSON;
 
     std::string serializedPayload = loginPayLoad.dump();
-    http.begin(POST_LOGIN);
+    http.begin(POST_LOGIN.c_str());
     http.addHeader("Content-Type", "application/json");
     int httpResponseCode = http.POST((serializedPayload +"\n").c_str());
 
     if (httpResponseCode>0) {
         Serial.print("HTTP Response code: ");
         Serial.println(httpResponseCode);
-        tokenJSON = http.getString();
-        Serial.println(tokenJSON);
+        tokenJSON = http.getString().c_str();
+        Serial.println(tokenJSON.c_str());
     }
     else {
         Serial.print("Error code: ");
@@ -40,17 +40,17 @@ std::string getBearerToken(HTTPClient &http, const std::string& username, const 
 
 eventSpace::events getEvents(HTTPClient &http,const std::string& bearerToken){
 
-    http.begin(GET_EVENTS);
+    http.begin(GET_EVENTS.c_str());
     http.addHeader("Authorization",("Bearer "+ bearerToken).c_str());
-    String rawJSON;
+    std::string rawJSON;
 
     int httpResponseCode = http.GET();
 
     if (httpResponseCode>0) {
         Serial.print("HTTP Response code: ");
         Serial.println(httpResponseCode);
-        rawJSON = http.getString();
-        Serial.println(rawJSON);
+        rawJSON = http.getString().c_str();
+        Serial.println(rawJSON.c_str());
     }
     else {
         Serial.print("Error code: ");
@@ -63,10 +63,10 @@ eventSpace::events getEvents(HTTPClient &http,const std::string& bearerToken){
 
 bool deleteEvent(HTTPClient &http,const std::string& bearerToken,const int unixTime){
 
-    http.begin(DELETE_EVENT);
+    http.begin(DELETE_EVENT.c_str());
     http.addHeader("Content-Type", "application/json");
     http.addHeader("Authorization",("Bearer "+ bearerToken).c_str());
-    String rawJSON;
+    std::string rawJSON;
 
     nlohmann::json deletePayload;
     deletePayload["eventDate"] = std::to_string(unixTime);
@@ -80,8 +80,8 @@ bool deleteEvent(HTTPClient &http,const std::string& bearerToken,const int unixT
     if (httpResponseCode==200) {
         Serial.print("HTTP Response code: ");
         Serial.println(httpResponseCode);
-        rawJSON = http.getString();
-        Serial.println(rawJSON);
+        rawJSON = http.getString().c_str();
+        Serial.println(rawJSON.c_str());
         http.end();
         httpSuccess = true;
     }
