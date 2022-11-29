@@ -30,8 +30,6 @@ function MainPage(props: Props) {
 
   function deleteButtonHandler(id: number, unixTime: number): void {
 
-    console.log(unixTime);
-
     fetchRequest("http://localhost:8000/api/user/eventDate", { "eventDate": unixTime.toString() }, "DELETE").then((data) => {
 
       setNotificationVis(true);
@@ -54,7 +52,7 @@ function MainPage(props: Props) {
         console.log(data);
         let jsonObject = data as TimedEvent[];
         initEvents(jsonObject);
-      } else if (data === "null" && data.status) {
+      } else {
         console.log("failed!!!", data.status, data);
         setNotificationText("No events found!");
         setNotificationVis(true);
