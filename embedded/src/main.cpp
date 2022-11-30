@@ -21,20 +21,23 @@ const char *wifiPassword = SSID_PASSWORD;
 
 /* TODO:
     Add GPIO interrupts for all three buttons
-
+    Configure buttons pins
+    Revise task management
+    Implement pitch
+    Implement metronome
 */
 
 // LCD
 static LiquidCrystal *lcd;
 // Core variables
 static const std::vector<std::string> menuItmes = {"Metronome", "Tuner", "Whatever"};
-static bool button1Pressed = false;
-static bool button2Pressed = false;
-static bool button3Pressed = false;
+static volatile bool button1Pressed = false;
+static volatile bool button2Pressed = false;
+static volatile bool button3Pressed = false;
+static volatile bool setupFlag = true;
 // FreeRTOS parameters
 static uint8_t ucParameterToPass;
 static TaskHandle_t Task1;
-static TaskHandle_t Task2;
 static TaskHandle_t TaskAlarm;
 static TaskHandle_t TaskMetronome;
 static TaskHandle_t TaskPitch;
@@ -165,9 +168,15 @@ void vTaskMain(void *pvParameters)
     int i = 0;
     for (;;)
     {
-        printLocalTime();
+        if (i == 9)
+        {
+            printLocalTime();
+            i = 0;
+        }
 
 #pragma region Buttons
+
+        // Stop task when button 1&3 are pressed when a task is running.
         if (button1Pressed && button3Pressed)
         {
             button1Pressed = false;
@@ -176,18 +185,23 @@ void vTaskMain(void *pvParameters)
             {
                 vTaskSuspend(*CurrentTask);
                 CurrentTask = nullptr;
+                setupFlag = true;
+                Serial.println("Suspend Task");
+                clearLineWithMutex(1);
             }
         }
+
         // Only select and execute tasks when no task is running
         if (CurrentTask == nullptr)
         {
             if (button1Pressed)
             {
+                Serial.print("Button 1");
                 button1Pressed = false;
                 menuIndex--;
                 if (menuIndex < 0)
                 {
-                    menuIndex == NUMAPPS - 1;
+                    menuIndex = menuItmes.size() - 1;
                 }
                 clearLineWithMutex(1);
                 printToLCDWithMutex(menuItmes[menuIndex].c_str(), 0, 1);
@@ -195,9 +209,10 @@ void vTaskMain(void *pvParameters)
 
             if (button3Pressed)
             {
-                button3Pressed;
+                Serial.print("Button3");
+                button3Pressed = false;
                 menuIndex++;
-                if (menuIndex > NUMAPPS - 1)
+                if (menuIndex > menuItmes.size() - 1)
                 {
                     menuIndex = 0;
                 }
@@ -207,6 +222,7 @@ void vTaskMain(void *pvParameters)
 
             if (button2Pressed)
             {
+                Serial.print("Button 2");
                 button2Pressed = false;
                 switch (menuIndex)
                 {
@@ -231,12 +247,13 @@ void vTaskMain(void *pvParameters)
         {
             if (xSemaphoreTake(alarmSemaphore, portMAX_DELAY) == pdTRUE)
             {
-                // vTaskSuspend(*CurrentTask);
-                // vTaskResume(TaskAlarm);
-                // CurrentTask = &TaskAlarm;
+                vTaskSuspend(*CurrentTask);
+                vTaskResume(TaskAlarm);
+                CurrentTask = &TaskAlarm;
             }
         }
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+        i++;
     }
 }
 // handles the alarm
@@ -263,57 +280,45 @@ void vTaskAlarm(void *pvParameters)
     vTaskSuspend(NULL); // suspend oneself
 }
 
-void vTaskDebug(void *pvParameters)
-{
-    Serial.println(xPortGetCoreID());
-    for (;;)
-    {
-        Serial.println("Task 2");
-        delay(1000);
-    }
-}
-
 void vTaskMetronome(void *pvParameters)
 {
     // set up metronome
     int bpm = 60;
     std::string s = "BPM: ";
-    clearLineWithMutex(1);
-    printToLCDWithMutex(s + std::to_string(bpm), 0, 1);
-    while (!button2Pressed)
-    {
-        if (button1Pressed)
-        {
-            button1Pressed = false;
-            bpm--;
-            clearLineWithMutex(1);
-            printToLCDWithMutex(s + std::to_string(bpm), 0, 1);
-        }
-        if (button3Pressed)
-        {
-            button3Pressed = false;
-            bpm++;
-            clearLineWithMutex(1);
-            printToLCDWithMutex(s + std::to_string(bpm), 0, 1);
-        }
-        vTaskDelay(100 / portTICK_PERIOD_MS);
-    }
     for (;;)
     {
-        for (int i = 0; i < 4; i++)
+        if (setupFlag)
         {
-            vTaskDelay(((6000 / bpm) / 4) / portTICK_PERIOD_MS);
+            setupFlag = false;
+            clearLineWithMutex(1);
+            printToLCDWithMutex(s + std::to_string(bpm), 0, 1);
+            while (!button2Pressed)
+            {
+                if (button1Pressed)
+                {
+                    button1Pressed = false;
+                    bpm--;
+                    clearLineWithMutex(1);
+                    printToLCDWithMutex(s + std::to_string(bpm), 0, 1);
+                }
+                if (button3Pressed)
+                {
+                    button3Pressed = false;
+                    bpm++;
+                    clearLineWithMutex(1);
+                    printToLCDWithMutex(s + std::to_string(bpm), 0, 1);
+                }
+                vTaskDelay(100 / portTICK_PERIOD_MS);
+            }
+            button2Pressed = false;
+        }
+        for (int i = 0; i < 16; i++)
+        {
+            vTaskDelay((60000 / bpm) / portTICK_PERIOD_MS);
 
-            if (xSemaphoreTake(lcdSemaphore, portMAX_DELAY) == pdTRUE)
-            {
-                lcd->clearLine(1);
-                xSemaphoreGive(lcdSemaphore);
-            }
-            printToLCDWithMutex("----", i, 1);
-            if (i == 3)
-            {
-                Serial.println("Metronome");
-            }
+            clearLineWithMutex(1);
+            printToLCDWithMutex("-", i, 1);
+            Serial.println("Metronome");
         }
     }
 }
@@ -343,16 +348,16 @@ void setup()
     timerAttachInterrupt(timer, &onTimer, true);
     timerAlarmWrite(timer, TICKS_PER_SECOND * 10, true);
     timerAlarmEnable(timer);
-#if 0
+#if 1
     // Init GPIO interrupts
-    pinMode(0, INPUT_PULLUP);
-    attachInterrupt(0, onButton1, FALLING);
-
     pinMode(1, INPUT_PULLUP);
-    attachInterrupt(1, onButton2, FALLING);
+    attachInterrupt(1, onButton1, FALLING);
 
     pinMode(2, INPUT_PULLUP);
     attachInterrupt(2, onButton2, FALLING);
+
+    pinMode(42, INPUT_PULLUP);
+    attachInterrupt(42, onButton3, FALLING);
 #endif
     deserialize(data);
     Serial.print("Time:" + data.time);
@@ -394,14 +399,12 @@ void setup()
 
     lcd->clear();
     xTaskCreatePinnedToCore(vTaskMain, "Task1", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 2, &Task1, 1);
-    xTaskCreatePinnedToCore(vTaskDebug, "Task2", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 1, &Task2, 0);
-    vTaskSuspend(Task2);
 
     xTaskCreatePinnedToCore(vTaskAlarm, "TaskAlarm", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 1, &TaskAlarm, 0);
     vTaskSuspend(TaskAlarm);
 
     xTaskCreatePinnedToCore(vTaskMetronome, "TaskMetronome", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 1, &TaskMetronome, 0);
-    // vTaskSuspend(TaskMetronome);
+    vTaskSuspend(TaskMetronome);
 
     xTaskCreatePinnedToCore(vTaskPitch, "TaskPitch", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 1, &TaskPitch, 0);
     vTaskSuspend(TaskPitch);
