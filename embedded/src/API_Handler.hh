@@ -8,6 +8,7 @@ const std::string PORT           =   ":8000";
 const std::string POST_LOGIN     =   "http://" + HOST_ADDRESS + PORT + "/api/login";
 const std::string GET_EVENTS     =   "http://" + HOST_ADDRESS + PORT + "/api/user/events";
 const std::string DELETE_EVENT   =   "http://" + HOST_ADDRESS + PORT + "/api/user/eventDate";
+const std::string PATCH_EVENT   =   "http://" + HOST_ADDRESS + PORT + "/api/user/event";
 
 std::string getBearerToken(HTTPClient &http, const std::string& username, const std::string& password){
 
@@ -76,6 +77,46 @@ bool deleteEvent(HTTPClient &http,const std::string& bearerToken,const int unixT
     bool httpSuccess;
 
     int httpResponseCode = http.sendRequest("DELETE", serializedPayload.c_str());
+
+    if (httpResponseCode==200) {
+        Serial.print("HTTP Response code: ");
+        Serial.println(httpResponseCode);
+        rawJSON = http.getString().c_str();
+        Serial.println(rawJSON.c_str());
+        http.end();
+        httpSuccess = true;
+    }
+    else {
+        Serial.print("Error code: ");
+        Serial.println(httpResponseCode);
+        http.end();
+        httpSuccess = false;
+    }
+
+    return httpSuccess;
+
+}
+
+
+bool changeEventTime(HTTPClient &http, const std::string& bearerToken, const int newUnixTime, const eventSpace::event& newEvent){
+
+    http.begin(PATCH_EVENT.c_str());
+    http.addHeader("Content-Type", "application/json");
+    http.addHeader("Authorization",("Bearer "+ bearerToken).c_str());
+    std::string rawJSON;
+
+    nlohmann::json patchPayload;
+    patchPayload["eventTimeNewUnix"] = std::to_string(newUnixTime);
+    patchPayload["eventTimeOldUnix"] = std::to_string(newEvent.get_eventtime());
+    patchPayload["eventName"] = newEvent.get_eventname();
+    patchPayload["isSilent"] = std::to_string(newEvent.get_issilent());
+    patchPayload["SnoozeDisabled"] = std::to_string(newEvent.get_snoozedisabled());
+
+    std::string serializedPayload = patchPayload.dump();
+
+    bool httpSuccess;
+
+    int httpResponseCode = http.sendRequest("PATCH", serializedPayload.c_str());
 
     if (httpResponseCode==200) {
         Serial.print("HTTP Response code: ");

@@ -29,13 +29,20 @@ void setup() {
     auto token = getBearerToken(*http,"test","test");
     auto events = getEvents(*http, token);
 
-    Serial.println(deleteEvent(*http,token,1669458780) ? "OK!!" : "FAILED!!");
+    eventSpace::event test;
 
-    beep();
+    test.set_eventname("hello");
+    test.set_eventtime(123);
+    test.set_issilent(false);
+    test.set_snoozedisabled(true);
 
-    for(const eventSpace::event& i : events) {
+
+    Serial.println(changeEventTime(*http,token,1000,test) ? "OK!!" : "FAILED!!");
+
+
+/*    for(const eventSpace::event& i : events) {
         Serial.printf("%s\n", i.get_eventname().c_str());
-    }
+    }*/
 
 }
 
