@@ -2,7 +2,7 @@
 #include <HTTPClient.h>
 #include "events.hh"
 
-const std::string HOST_ADDRESS = "172.20.10.4";
+const std::string HOST_ADDRESS = "192.168.172.101";
 const std::string PORT = ":8000";
 
 const std::string POST_LOGIN = "http://" + HOST_ADDRESS + PORT + "/api/login";

@@ -8,13 +8,15 @@
 #include "EEPROM.h"
 #include <vector>
 #include <LiquidCrystal.h>
+#include "arduinoFFT.h"
 #define CLK_FREQ 80000000
 #define PRESCALER 80
 #define TICKS_PER_SECOND (CLK_FREQ / PRESCALER)
-#define SSID_NAME "Simon’s iPhone"
-#define SSID_PASSWORD "wizard12"
-#define NUMAPPS 3
+#define SSID_NAME "abcd"
+#define SSID_PASSWORD "12345678"
 #define BEEPERPIN 21
+#define SAMPLES 128
+#define SAMPLING_FREQUENCY 2048
 const char *wifiSSID = SSID_NAME;
 const char *wifiPassword = SSID_PASSWORD;
 
@@ -32,7 +34,7 @@ static std::string token;
 // LCD
 static LiquidCrystal *lcd;
 // Core variables
-static const std::vector<std::string> menuItmes = {"Metronome", "Tuner", "Whatever"};
+static const std::vector<std::string> menuItmes = {"Metronome", "Tuner", "Update"};
 static volatile bool button1Pressed = false;
 static volatile bool button2Pressed = false;
 static volatile bool button3Pressed = false;
@@ -241,6 +243,8 @@ void vTaskMain(void *pvParameters)
                     vTaskResume(TaskPitch);
                     break;
                 case 2: // Other task...
+                    events = getEvents(*httpclient, token);
+                    break;
                 default:
                     break;
                 }
@@ -251,12 +255,7 @@ void vTaskMain(void *pvParameters)
 
         if (checkAlarms(data.time))
         {
-            if (xSemaphoreTake(alarmSemaphore, portMAX_DELAY) == pdTRUE)
-            {
-                vTaskSuspend(*CurrentTask);
-                vTaskResume(TaskAlarm);
-                CurrentTask = &TaskAlarm;
-            }
+            vTaskResume(TaskAlarm);
         }
         vTaskDelay(100 / portTICK_PERIOD_MS);
         i++;
@@ -266,7 +265,7 @@ void vTaskMain(void *pvParameters)
 void vTaskAlarm(void *pvParameters)
 {
     // start beeping
-
+    Serial.println("ALARM!");
     int size = sizeof(melody) / sizeof(int);
     for (int thisNote = 0; thisNote < size; thisNote++)
     {
@@ -279,7 +278,7 @@ void vTaskAlarm(void *pvParameters)
         noTone(BEEPERPIN);
     }
 
-    xSemaphoreGive(alarmSemaphore);
+    // xSemaphoreGive(alarmSemaphore);
     CurrentTask = nullptr;
     vTaskSuspend(NULL); // suspend oneself
 }
@@ -330,11 +329,48 @@ void vTaskMetronome(void *pvParameters)
 
 void vTaskPitch(void *pvParameters)
 {
+    arduinoFFT FFT = arduinoFFT();
+
+    unsigned int samplingPeriod;
+    unsigned long microSeconds;
+
+    double vReal[SAMPLES];
+    double vImag[SAMPLES];
+    samplingPeriod = round(1000000 * (1.0 / SAMPLING_FREQUENCY));
+
     for (;;)
     {
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        for (int i = 0; i < SAMPLES; i++)
+        {
+            microSeconds = micros(); // Returns the number of microseconds since the Arduino board began running the current script.
+
+            vReal[i] = analogRead(5); // Reads the value from analog pin 0 (A0), quantize it and save it as a real term.
+            vImag[i] = 0;             // Makes imaginary term 0 always
+
+            /*remaining wait time between samples if necessary*/
+            while (micros() < (microSeconds + samplingPeriod))
+            {
+                // do nothing
+            }
+        }
+        /*Perform FFT on samples*/
+        FFT.Windowing(vReal, SAMPLES, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
+        FFT.Compute(vReal, vImag, SAMPLES, FFT_FORWARD);
+        FFT.ComplexToMagnitude(vReal, vImag, SAMPLES);
+
+        /*Find peak frequency and print peak*/
+        double peak = FFT.MajorPeak(vReal, SAMPLES, SAMPLING_FREQUENCY);
+
+        Serial.println(peak);
+        char output[16];
+        snprintf(output, 16, "%f", peak / 2);
+        printToLCDWithMutex(output, 0, 1);
+
+        vTaskDelay(500 / portTICK_PERIOD_MS);
+        Serial.println(output);
     }
 }
+
 #pragma endregion
 
 void setup()
@@ -388,7 +424,11 @@ void setup()
 #if 1
     // Poll events from the server
     httpclient = new HTTPClient();
-    token = getBearerToken(*httpclient, "test", "test");
+    token = getBearerToken(*httpclient, "admin", "1234");
+    if (token == "")
+    {
+        exit(69);
+    }
     events = getEvents(*httpclient, token);
 
     for (eventSpace::event i : events)
@@ -400,6 +440,7 @@ void setup()
 #endif
 
     lcd->clear();
+    printToLCDWithMutex(menuItmes[0], 0, 1);
     xTaskCreatePinnedToCore(vTaskMain, "Task1", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 2, &Task1, 1);
 
     xTaskCreatePinnedToCore(vTaskAlarm, "TaskAlarm", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 1, &TaskAlarm, 0);
@@ -408,7 +449,7 @@ void setup()
     xTaskCreatePinnedToCore(vTaskMetronome, "TaskMetronome", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 1, &TaskMetronome, 0);
     vTaskSuspend(TaskMetronome);
 
-    xTaskCreatePinnedToCore(vTaskPitch, "TaskPitch", 2048, &ucParameterToPass, tskIDLE_PRIORITY + 1, &TaskPitch, 0);
+    xTaskCreatePinnedToCore(vTaskPitch, "TaskPitch", 2048 * 2, &ucParameterToPass, tskIDLE_PRIORITY + 1, &TaskPitch, 0);
     vTaskSuspend(TaskPitch);
 }
 
