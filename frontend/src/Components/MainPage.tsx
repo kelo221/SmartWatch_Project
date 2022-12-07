@@ -13,10 +13,6 @@ type Props = {
   setEventVisState: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-
-
-
-
 function MainPage(props: Props) {
 
   const [queryCheck, setQueryCheck] = useState(false);
@@ -27,6 +23,27 @@ function MainPage(props: Props) {
     setNotificationVis, setNotificationAlertLevel, notificationAlertLevel,
     notificationText, notificationVisibility, setNotificationText
   } = notificationStore();
+
+  useEffect(() => {
+    fetchRequest("http://localhost:8000/api/user/events", {}, "GET").then((data) => {
+      if (data !== "null" && data !== null && !data.status) {
+        let jsonObject = data as TimedEvent[];
+        initEvents(jsonObject);
+      } else if (data === null){
+        setNotificationText("No events found!");
+        setNotificationVis(true);
+        setNotificationAlertLevel("critical");
+        setQueryCheck(false);
+      } else if (data.status ===400){
+        setNotificationText("Connection failed!");
+        setNotificationVis(true);
+        setNotificationAlertLevel("critical");
+        setQueryCheck(true);
+      }
+    });
+  }, []);
+
+
 
   function deleteButtonHandler(id: number, unixTime: number): void {
 
@@ -47,11 +64,13 @@ function MainPage(props: Props) {
 
 
   useEffect(() => {
-    fetchRequest("http://localhost:8000/api/user/events", {}, "GET").then((data) => {
-      if (data !== "null" && data !== null && !data.status) {
-        let jsonObject = data as TimedEvent[];
-        initEvents(jsonObject);
-      } else if (data === null){
+    const interval = setInterval(() => {
+      console.log("updating..");
+      fetchRequest("http://localhost:8000/api/user/events", {}, "GET").then((data) => {
+        if (data !== "null" && data !== null && !data.status) {
+          let jsonObject = data as TimedEvent[];
+          initEvents(jsonObject);
+        } else if (data === null){
           setNotificationText("No events found!");
           setNotificationVis(true);
           setNotificationAlertLevel("critical");
@@ -62,8 +81,13 @@ function MainPage(props: Props) {
           setNotificationAlertLevel("critical");
           setQueryCheck(true);
         }
-    });
+      });
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
+
+
 
   if (queryCheck && events.length === 0) {
     return (
