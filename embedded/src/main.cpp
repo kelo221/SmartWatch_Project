@@ -27,7 +27,8 @@ const char *wifiPassword = SSID_PASSWORD;
     Implement pitch
     Implement metronome
 */
-
+static HTTPClient *httpclient;
+static std::string token;
 // LCD
 static LiquidCrystal *lcd;
 // Core variables
@@ -122,14 +123,18 @@ void IRAM_ATTR onButton3()
 
 bool checkAlarms(const time_t currentTime)
 {
-    if (!alarms.empty())
+    if (!events.empty())
     {
-        auto it = alarms.begin();
-        while (it != alarms.end())
+        auto it = events.begin();
+        while (it != events.end())
         {
-            if (*it > currentTime - 2 && *it < currentTime + 2)
+            if (it->get_eventtime() > currentTime - 2 && it->get_eventtime() < currentTime + 2)
             {
-                it = alarms.erase(it);
+                it = events.erase(it);
+                if (!deleteEvent(*httpclient, token, it->get_eventtime()))
+                {
+                    return false;
+                };
                 return true;
             }
             ++it;
@@ -342,13 +347,12 @@ void setup()
     lcd->begin(16, 2);
     lcd->setCursor(0, 0); // Left: horizontal, right: vertical (16x2)
     printToLCDWithMutex("hi", 0, 0);
-#if 1
+
     // Init timer
     timer = timerBegin(0, PRESCALER, true);
     timerAttachInterrupt(timer, &onTimer, true);
     timerAlarmWrite(timer, TICKS_PER_SECOND * 10, true);
     timerAlarmEnable(timer);
-#if 1
     // Init GPIO interrupts
     pinMode(1, INPUT_PULLUP);
     attachInterrupt(1, onButton1, FALLING);
@@ -358,7 +362,6 @@ void setup()
 
     pinMode(42, INPUT_PULLUP);
     attachInterrupt(42, onButton3, FALLING);
-#endif
     deserialize(data);
     Serial.print("Time:" + data.time);
     setTMStructToTime(&data.time);
@@ -382,12 +385,11 @@ void setup()
     lcd->clearLine(1);
     lcd->setCursor(0, 0);
     configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-#endif
-#if 0
+#if 1
     // Poll events from the server
-    auto http = new HTTPClient();
-    auto token = getBearerToken(*http, "test", "test");
-    events = getEvents(*http, token);
+    httpclient = new HTTPClient();
+    token = getBearerToken(*httpclient, "test", "test");
+    events = getEvents(*httpclient, token);
 
     for (eventSpace::event i : events)
     {

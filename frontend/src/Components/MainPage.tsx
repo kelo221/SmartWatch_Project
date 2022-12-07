@@ -21,7 +21,7 @@ function MainPage(props: Props) {
 
   const [queryCheck, setQueryCheck] = useState(false);
   const { removeEvent, events, initEvents } = eventStore();
-  const { setAsNewEvent, setEventDate, setEventName, setSilent, setTimeString, setOldTime, oldTime } = popUpStore();
+  //const { setAsNewEvent, setEventDate, setEventName, setSilent, setTimeString, setOldTime, oldTime } = popUpStore();
 
   const {
     setNotificationVis, setNotificationAlertLevel, notificationAlertLevel,
@@ -29,8 +29,6 @@ function MainPage(props: Props) {
   } = notificationStore();
 
   function deleteButtonHandler(id: number, unixTime: number): void {
-
-    console.log(unixTime);
 
     fetchRequest("http://localhost:8000/api/user/eventDate", { "eventDate": unixTime.toString() }, "DELETE").then((data) => {
 
@@ -51,21 +49,37 @@ function MainPage(props: Props) {
   useEffect(() => {
     fetchRequest("http://localhost:8000/api/user/events", {}, "GET").then((data) => {
       if (data !== "null" && data !== null && !data.status) {
-        console.log(data);
         let jsonObject = data as TimedEvent[];
         initEvents(jsonObject);
-      } else if (data === "null" && data.status) {
-        console.log("failed!!!", data.status, data);
-        setNotificationText("No events found!");
-        setNotificationVis(true);
-        setNotificationAlertLevel("critical");
-        setQueryCheck(true);
-      }
+      } else if (data === null){
+          setNotificationText("No events found!");
+          setNotificationVis(true);
+          setNotificationAlertLevel("critical");
+          setQueryCheck(false);
+        } else if (data.status ===400){
+          setNotificationText("Connection failed!");
+          setNotificationVis(true);
+          setNotificationAlertLevel("critical");
+          setQueryCheck(true);
+        }
     });
   }, []);
 
   if (queryCheck && events.length === 0) {
     return (
+      <>
+        {notificationVisibility && (
+          <>
+            <Box align="center" gap="small">
+              <Notification
+                toast={{ position: "top" }}
+                status={notificationAlertLevel}
+                message={notificationText}
+                onClose={() => setNotificationVis(true)} />
+            </Box>
+          </>
+        )}
+
       <Card
         pad={"small"}
         margin="small"
@@ -86,12 +100,26 @@ function MainPage(props: Props) {
         ) : <></>
         }
       </Card>
+      </>
     );
   }
 
 
   if (events.length === 0) {
     return (
+      <>
+        {notificationVisibility && (
+          <>
+            <Box align="center" gap="small">
+              <Notification
+                toast={{ position: "top" }}
+                status={notificationAlertLevel}
+                message={notificationText}
+                onClose={() => setNotificationVis(true)} />
+            </Box>
+          </>
+        )}
+
       <Card
         pad={"small"}
         margin="small"
@@ -110,6 +138,7 @@ function MainPage(props: Props) {
         <LinkUp></LinkUp>
         <Text>Create some events!</Text>
       </Card>
+      </>
     );
   }
 
