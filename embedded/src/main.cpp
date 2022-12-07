@@ -14,6 +14,7 @@
 #define SSID_NAME "Simon’s iPhone"
 #define SSID_PASSWORD "wizard12"
 #define NUMAPPS 3
+#define BEEPERPIN 21
 const char *wifiSSID = SSID_NAME;
 const char *wifiPassword = SSID_PASSWORD;
 
@@ -260,21 +261,19 @@ void vTaskMain(void *pvParameters)
 void vTaskAlarm(void *pvParameters)
 {
     // start beeping
-    bool exit = false;
-    int i = 0;
-    while (!exit)
+
+    int size = sizeof(melody) / sizeof(int);
+    for (int thisNote = 0; thisNote < size; thisNote++)
     {
-        // beep for x miliseconds
-        // stop beeping
-        // check input
-        // exit
-        Serial.println("Beep");
-        i++;
-        if (i == 10)
-        {
-            return;
-        }
+        const int noteDuration = 900 / noteDurations[thisNote];
+
+        tone(BEEPERPIN, melody[thisNote], noteDuration);
+
+        const int pauseBetweenNotes = noteDuration * 1.30;
+        vTaskDelay(pauseBetweenNotes / portMAX_DELAY);
+        noTone(BEEPERPIN);
     }
+
     xSemaphoreGive(alarmSemaphore);
     CurrentTask = nullptr;
     vTaskSuspend(NULL); // suspend oneself
@@ -318,6 +317,7 @@ void vTaskMetronome(void *pvParameters)
 
             clearLineWithMutex(1);
             printToLCDWithMutex("-", i, 1);
+            tone(BEEPERPIN, 440, 100);
             Serial.println("Metronome");
         }
     }
